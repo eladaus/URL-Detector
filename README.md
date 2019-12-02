@@ -54,12 +54,12 @@ For example, the following code will find the url `linkedin.com`
 ```csharp
 
     UrlDetector parser = new UrlDetector("hello this is a url Linkedin.com", UrlDetectorOptions.Default);
-    List<Url> found = parser.detect();
+    List<Url> found = parser.Detect();
 
-    for(Url url : found) {
-        System.out.println("Scheme: " + url.getScheme());
-        System.out.println("Host: " + url.getHost());
-        System.out.println("Path: " + url.getPath());
+    foreach(Url url in found) {
+        Console.WriteLine("Scheme: " + url.getScheme());
+        Console.WriteLine("Host: " + url.getHost());
+        Console.WriteLine("Path: " + url.getPath());
     }
 ```
 
@@ -78,7 +78,7 @@ In code this looks like:
 ```csharp
 
     UrlDetector parser = new UrlDetector("<a href="linkedin.com/abc">linkedin.com</a>", UrlDetectorOptions.HTML);
-    List<Url> found = parser.detect();
+    List<Url> found = parser.Detect();
 
 ```
 
