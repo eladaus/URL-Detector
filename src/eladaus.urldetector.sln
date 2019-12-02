@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29215.179
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "urldetector", "urldetector\urldetector.csproj", "{F5DDB6E9-E3E2-4E45-AEB2-4BFF23457E9F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "urldetector.tests", "urldetector.tests\urldetector.tests.csproj", "{3BE70A2A-558F-41D7-A323-E8B4BEAF9AF0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "documentation", "documentation", "{A99A47BA-1557-44F1-BE64-C9AADA9A114B}"
+	ProjectSection(SolutionItems) = preProject
+		..\Open Sourcing URL-Detector - A Java Library to Detect and Normalize URLs in Text.pdf = ..\Open Sourcing URL-Detector - A Java Library to Detect and Normalize URLs in Text.pdf
+		..\README.md = ..\README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F5DDB6E9-E3E2-4E45-AEB2-4BFF23457E9F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5DDB6E9-E3E2-4E45-AEB2-4BFF23457E9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5DDB6E9-E3E2-4E45-AEB2-4BFF23457E9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5DDB6E9-E3E2-4E45-AEB2-4BFF23457E9F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3BE70A2A-558F-41D7-A323-E8B4BEAF9AF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3BE70A2A-558F-41D7-A323-E8B4BEAF9AF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3BE70A2A-558F-41D7-A323-E8B4BEAF9AF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3BE70A2A-558F-41D7-A323-E8B4BEAF9AF0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E2CD4E7F-3566-4E8F-AEF7-613DDC67F2E0}
+	EndGlobalSection
+EndGlobal
