@@ -4,7 +4,7 @@
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Authors>Dale Holborow, LinkedIn</Authors>
+    <Authors>Dale Holborow (C# port), LinkedIn (original Java)</Authors>
     <Company>eladaus oy</Company>
     <Product>eladaus.urldetector</Product>
     <Description>C# port of the LinkedIn engineering team's open source Java library to detect urls from a body of text. For original description, see https://engineering.linkedin.com/blog/2016/06/open-sourcing-url-detector--a-java-library-to-detect-and-normali and also https://github.com/linkedin/URL-Detector</Description>
@@ -15,6 +15,7 @@
     <PackageTags>urldetector parser eladaus linkedin</PackageTags>
     <PackageId>eladaus.urldetector</PackageId>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <PackageReleaseNotes>Initial C# port of java version as at 20.07.2019</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
