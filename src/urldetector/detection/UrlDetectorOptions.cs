@@ -1,8 +1,11 @@
-﻿namespace urldetector.detection
+﻿using System;
+
+namespace urldetector.detection
 {
 	/// <summary>
 	/// The options to use when detecting urls. This enum is used as a bit mask to be able to set multiple options at once.
 	/// </summary>
+	[Flags]
 	public enum UrlDetectorOptions
 	{
 		/// <summary>
@@ -54,34 +57,5 @@
 		/// </summary>
 		ALLOW_SINGLE_LEVEL_DOMAIN = 32 //00100000
 
-		/////// <summary>
-		//// The numeric value.
-		////  /
-		////private int _value;
-
-		/////// <summary>
-		//// Creates a new Options enum
-		//// @param value The numeric value of the enum
-		////  /
-		////UrlDetectorOptions(int value) {
-		////  this._value = value;
-		////}
-
-		/////// <summary>
-		//// Checks if the current options have the specified flag.
-		//// @param flag The flag to check for.
-		//// @return True if this flag is active, else false.
-		////  /
-		////public bool hasFlag(UrlDetectorOptions flag) {
-		////  return (_value & flag._value) == flag._value;
-		////}
-
-		/////// <summary>
-		//// Gets the numeric value of the enum
-		//// @return The numeric value of the enum
-		////  /
-		////public int getValue() {
-		////  return _value;
-		////}
 	}
 }

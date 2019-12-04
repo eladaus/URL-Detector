@@ -23,18 +23,46 @@ namespace urldetector.detection
 			InvalidUrl
 		}
 
-		/// <summary>
-		/// Contains the string to check for and remove if the scheme is this.
-		/// </summary>
-		private static readonly string HTML_MAILTO = "mailto:";
+		///// <summary>
+		///// Contains the string to check for and remove if the scheme is this.
+		///// </summary>
+		//private static readonly string HTML_MAILTO = "mailto:";
 
 		/// <summary>
-		/// Valid protocol schemes. @Dale maybe I should make this an Immutable collection
+		/// Valid protocol schemes. 
 		/// </summary>
-		private static readonly HashSet<string> VALID_SCHEMES = new HashSet<string>
+		private HashSet<string> ValidSchemesSuffixed { get; } = new HashSet<string>();
+		private HashSet<string> ValidSchemesNames { get; } = new HashSet<string>();
+		
+		
+		/// <summary>
+		/// Take a list of strings like 'ftp', 'http', 'attachment' and append them as a full
+		/// searchable instance to the collection of schemes to find in the input, like
+		/// 'ftp://', 'ftp%3a//', 'http://', 'http%3a//' etc
+		/// </summary>
+		/// <param name="validSchemes"></param>
+		private void SetValidSchemes(IEnumerable<string> validSchemes)
 		{
-			"http://", "https://", "ftp://", "ftps://", "http%3a//", "https%3a//", "ftp%3a//", "ftps%3a//"
-		};
+			ValidSchemesNames.Clear();
+			ValidSchemesSuffixed.Clear();
+
+			foreach (var validScheme in validSchemes)
+			{
+				var lowerInvariant = validScheme.Trim().ToLowerInvariant();
+				ValidSchemesNames.Add(lowerInvariant);
+				ValidSchemesSuffixed.Add(lowerInvariant + "://");
+				ValidSchemesSuffixed.Add(lowerInvariant + "%3a//");
+			}
+		}
+
+		/// <summary>
+		/// Return a readonly copy of the schemes that the UrlDetector is currently configured to detect
+		/// </summary>
+		/// <returns></returns>
+		public HashSet<string> ListValidSchemes()
+		{
+			return new HashSet<string>(ValidSchemesNames);
+		}
 
 
 		/// <summary>
@@ -98,10 +126,18 @@ namespace urldetector.detection
 		/// </summary>
 		/// <param name="content"></param>
 		/// <param name="options"></param>
-		public UrlDetector(string content, UrlDetectorOptions options)
+		/// <param name="validSchemes"></param>
+		public UrlDetector(string content, UrlDetectorOptions options, HashSet<string> validSchemes = null)
 		{
 			_reader = new InputTextReader(content);
 			_options = options;
+
+			if (validSchemes == null || validSchemes.Count == 0) validSchemes = new HashSet<string>
+			{
+				"http", "https", "ftp", "ftps"
+			};
+
+			SetValidSchemes(validSchemes);
 		}
 
 
@@ -480,20 +516,20 @@ namespace urldetector.detection
 		}
 
 		/// <summary>
-		/// Reads the scheme and allows returns true if the scheme is http(s?):// or ftp(s?)://
+		/// Reads the scheme and allows returns true if the scheme is in our allowed collection (e.g. http(s?):// or ftp(s?)://)
 		/// @return True if the scheme was found, else false.
 		/// </summary>
 		private bool ReadScheme()
 		{
-			//Check if we are checking html and the length is longer than mailto:
-			if (_options.HasFlag(UrlDetectorOptions.HTML) && _buffer.Length >= HTML_MAILTO.Length)
-			{
-				//Check if the string is actually mailto: then just return nothing.
-				if (HTML_MAILTO.Equals(_buffer.ToString().Substring(_buffer.Length - HTML_MAILTO.Length), StringComparison.CurrentCultureIgnoreCase))
-				{
-					return ReadEnd(ReadEndState.InvalidUrl);
-				}
-			}
+			//////Check if we are checking html and the length is longer than mailto:
+			////if (_options.HasFlag(UrlDetectorOptions.HTML) && _buffer.Length >= HTML_MAILTO.Length)
+			////{
+			////	//Check if the string is actually mailto: then just return nothing.
+			////	if (HTML_MAILTO.Equals(_buffer.ToString().Substring(_buffer.Length - HTML_MAILTO.Length), StringComparison.CurrentCultureIgnoreCase))
+			////	{
+			////		return ReadEnd(ReadEndState.InvalidUrl);
+			////	}
+			////}
 
 			var originalLength = _buffer.Length;
 			var numSlashes = 0;
@@ -509,7 +545,7 @@ namespace urldetector.detection
 					if (numSlashes == 1)
 					{
 						//return only if its an approved protocol. This can be expanded to allow others
-						if (VALID_SCHEMES.Contains(_buffer.ToString().ToLowerInvariant()))
+						if (ValidSchemesSuffixed.Contains(_buffer.ToString().ToLowerInvariant()))
 						{
 							_currentUrlMarker.SetIndex(UrlPart.SCHEME, 0);
 							return true;
