@@ -7,7 +7,7 @@
     <Authors>Dale Holborow (C# port), LinkedIn (original Java)</Authors>
     <Company>eladaus oy</Company>
     <Product>eladaus.urldetector</Product>
-    <Description>C# port of the LinkedIn engineering team's open source Java library to detect urls from a body of text. For original description, see https://engineering.linkedin.com/blog/2016/06/open-sourcing-url-detector--a-java-library-to-detect-and-normali and also https://github.com/linkedin/URL-Detector</Description>
+    <Description>C# port of the LinkedIn engineering team's open source Java library to detect urls from a body of text. See https://github.com/eladaus/URL-Detector</Description>
     <PackageLicenseExpression></PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/eladaus/URL-Detector</PackageProjectUrl>
     <RepositoryUrl>https://github.com/eladaus/URL-Detector</RepositoryUrl>
@@ -15,7 +15,7 @@
     <PackageTags>urldetector parser eladaus linkedin</PackageTags>
     <PackageId>eladaus.urldetector</PackageId>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
-    <PackageReleaseNotes>Make project dotnetstandard for portability</PackageReleaseNotes>
+    <PackageReleaseNotes>Fix infinite-loop on parsing bug</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
