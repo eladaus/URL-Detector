@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace urldetector.eladaus
 {
@@ -325,9 +327,40 @@ namespace urldetector.eladaus
 			);
 
 
+		/// <summary>
+		/// E.g.
+		/// http://
+		/// ftp://
+		/// xfire://
+		/// </summary>
+		public static ImmutableHashSet<string> UriSchemeNamesSuffixed;
+
+		/// <summary>
+		/// E.g.
+		/// ftp://
+		/// geo://
+		/// http://
+		/// sftp://
+		/// https://
+		/// mailto://
+		/// </summary>
+		public static ImmutableList<string> UriSchemeNamesSuffixedOrdered { get; }
+
+		public static string UriSuffix => "://";
+
 		static UriSchemeLookup()
 		{
-			// 
+			UriSchemeNamesSuffixed = UriSchemeNames.Select(u => $"{u}{UriSuffix}").ToImmutableHashSet();
+
+			UriSchemeNamesSuffixedOrdered = UriSchemeNamesSuffixed.OrderBy(usns => usns.Length).ThenBy(usns => usns).ToImmutableList();
+		}
+
+		
+
+		public static string DesuffixUriScheme(string suffixedScheme)
+		{
+			var lastIndexOf = suffixedScheme.LastIndexOf(UriSuffix, StringComparison.CurrentCultureIgnoreCase);
+			return suffixedScheme.Substring(0, lastIndexOf);
 		}
 	}
 }

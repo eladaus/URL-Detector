@@ -13,6 +13,10 @@ namespace urldetector.detection
 		/// </summary>
 		private readonly char[] _content;
 
+		/// <summary>
+		/// Total length of the input character array
+		/// </summary>
+		public int ContentLength => _content.Length; 
 
 		/// <summary>
 		/// The current position in the content we are looking at.

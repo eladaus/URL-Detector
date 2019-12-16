@@ -313,7 +313,7 @@ namespace urldetector.tests.detection
 		{
 			RunTest("<a href=\"http://www.google.com/\">google.com</a>", UrlDetectorOptions.Default,
 				//Doesn't have the http since it was read as "http:// and goes to the end.
-				"www.google.com/\">google.com</a>");
+				"http://www.google.com/\">google.com</a>");
 		}
 
 		[Fact]
@@ -486,7 +486,7 @@ namespace urldetector.tests.detection
 		{
 			RunTest("<a href=\"http://[::AAbb:]/\">google.com</a>", UrlDetectorOptions.Default,
 				//Doesn't have the http since it was read as "http:// and goes to the end.
-				"[::AAbb:]/\">google.com</a>");
+				"http://[::AAbb:]/\">google.com</a>");
 		}
 
 		[Fact]

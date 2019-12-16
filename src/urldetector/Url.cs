@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using urldetector.detection;
 using urldetector.eladaus;
@@ -144,11 +145,32 @@ namespace urldetector
 			{
 				if (Exists(UrlPart.SCHEME))
 				{
+					// Start with whatever (possibly dirty) scheme data the parser gave us. 
 					_scheme = GetPart(UrlPart.SCHEME);
-					var index = _scheme.IndexOf(":", StringComparison.InvariantCulture);
-					if (index != -1)
+
+					var schemeLowered = _scheme.ToLowerInvariant();
+
+					// See if the parser handed us a dirty scheme, e.g. input of ':u(https://test.co' -> scheme of ':u(https://'
+					
+					// Most of the time, we assume we got a clean one, e.g. 'http://' for hashset lookup speed:
+					if (UriSchemeLookup.UriSchemeNamesSuffixed.Contains(schemeLowered))
 					{
-						_scheme = _scheme.Substring(0, index);
+						_scheme = UriSchemeLookup.DesuffixUriScheme(_scheme);
+					}
+					else 
+					{
+						// Otherwise, we got a dirty one, lets find the longest matching suffix we can (e.g. sftp:// and ftp:// would
+						// both match a dirty input of ':u(sftp://mysite.com' but obviously we want sftp as the longer, more accurate match
+						for (var i = UriSchemeLookup.UriSchemeNamesSuffixedOrdered.Count-1; i >= 0; i--)
+						{
+							var compareScheme = UriSchemeLookup.UriSchemeNamesSuffixedOrdered[i];
+							if (schemeLowered.EndsWith(compareScheme))
+							{
+								_scheme = _scheme.Remove(0, _scheme.Length - compareScheme.Length);
+								_scheme = UriSchemeLookup.DesuffixUriScheme(_scheme);
+								break;
+							}
+						}
 					}
 				}
 				else if (!_originalUrl.StartsWith("//"))
