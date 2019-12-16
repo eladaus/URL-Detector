@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using System.Text;
 using urldetector.eladaus;
 
@@ -34,6 +36,20 @@ namespace urldetector.detection
 		private HashSet<string> ValidSchemesSuffixed { get; } = new HashSet<string>();
 		private HashSet<string> ValidSchemesNames { get; } = new HashSet<string>();
 		
+		private ImmutableArray<string> _validSchemesSuffixedOrdered;
+
+		private ImmutableArray<string> ValidSchemesSuffixedOrdered
+		{
+			get
+			{
+				if (_validSchemesSuffixedOrdered == null)
+				{
+					_validSchemesSuffixedOrdered = ValidSchemesSuffixed.OrderBy(usns => usns.Length).ThenBy(usns => usns).ToImmutableArray();
+				}
+
+				return _validSchemesSuffixedOrdered;
+			}
+		}
 		
 		/// <summary>
 		/// Take a list of strings like 'ftp', 'http', 'attachment' and append them as a full
@@ -54,6 +70,13 @@ namespace urldetector.detection
 				ValidSchemesSuffixed.Add(lowerInvariant + "%3a//");
 			}
 		}
+
+		/// <summary>
+		/// Maximum number of times a character at a particular index can be read by url detection algorithm before
+		/// we force it to be skipped over (to prevents excessive backtracking and infinite-loops)
+		/// </summary>
+		private static readonly int ContentReadByIndexMaximum = 10;
+
 
 		/// <summary>
 		/// Return a readonly copy of the schemes that the UrlDetector is currently configured to detect
@@ -152,7 +175,7 @@ namespace urldetector.detection
 			return _urlList;
 		}
 
-
+		
 		/// <summary>
 		/// The default input reader which looks for specific flags to start detecting the url.
 		/// </summary>
@@ -161,10 +184,26 @@ namespace urldetector.detection
 			//Keeps track of the number of characters read to be able to later cut out the domain name.
 			var length = 0;
 
+			// keep track of how many times each character in each index of the raw input has been read
+			var contentReadByIndexCount = new byte[_reader.ContentLength];
+
 			//until end of string read the contents
 			while (!_reader.Eof())
 			{
-				//read the next char to process.
+
+				// We want to ensure that backtracking and looping on content is limited from infinite-loops, so 
+				// we take the hit and track each time an element in the input is read, and if its been hit too
+				// many times, we step forwards until we find an element that has NOT been read too many times
+				var currentIndex = _reader.GetPosition();
+				contentReadByIndexCount[currentIndex] += 1;
+				while (contentReadByIndexCount[currentIndex] >= ContentReadByIndexMaximum)
+				{
+					// Forcably step to the next character in the input, so we jump out of infinite loops
+					_reader.Read();
+					currentIndex = _reader.GetPosition();
+				}
+
+				// Read the next char to process.
 				var curr = _reader.Read();
 
 				switch (curr)
@@ -521,16 +560,6 @@ namespace urldetector.detection
 		/// </summary>
 		private bool ReadScheme()
 		{
-			//////Check if we are checking html and the length is longer than mailto:
-			////if (_options.HasFlag(UrlDetectorOptions.HTML) && _buffer.Length >= HTML_MAILTO.Length)
-			////{
-			////	//Check if the string is actually mailto: then just return nothing.
-			////	if (HTML_MAILTO.Equals(_buffer.ToString().Substring(_buffer.Length - HTML_MAILTO.Length), StringComparison.CurrentCultureIgnoreCase))
-			////	{
-			////		return ReadEnd(ReadEndState.InvalidUrl);
-			////	}
-			////}
-
 			var originalLength = _buffer.Length;
 			var numSlashes = 0;
 
@@ -544,13 +573,35 @@ namespace urldetector.detection
 					_buffer.Append(curr);
 					if (numSlashes == 1)
 					{
-						//return only if its an approved protocol. This can be expanded to allow others
-						if (ValidSchemesSuffixed.Contains(_buffer.ToString().ToLowerInvariant()))
+						// return only if the buffer currently ends with an approved protocol.
+						// When we have buffered a string like: ":u(https://test.co" and are scanning the ':', we 
+						// consider this to have found a scheme (the https bit only, which will be parsed out later)
+						var bufferedUrlContent = _buffer.ToString().ToLowerInvariant();
+
+						// return only if we detect an approved protocol at the end of the current buffer. For
+						// efficiency, first check an exact match
+						if (ValidSchemesSuffixed.Contains(bufferedUrlContent))
 						{
 							_currentUrlMarker.SetIndex(UrlPart.SCHEME, 0);
 							return true;
 						}
 
+						// If no exact match found, try to find a valid scheme in the trailing content of the current buffer,
+						// starting with the longest matches available (e.g. sftp:// rather than ftp://
+						for (var i = ValidSchemesSuffixedOrdered.Length - 1; i >= 0; i--)
+						{
+							var vss = ValidSchemesSuffixedOrdered[i];
+							if (bufferedUrlContent.EndsWith(vss))
+							{
+								// see if we need to remove extra characters from the start of the buffer
+								if (bufferedUrlContent.Length > vss.Length)
+								{
+									_buffer.Remove(0, bufferedUrlContent.Length - vss.Length);
+								}
+								_currentUrlMarker.SetIndex(UrlPart.SCHEME, 0);
+								return true;
+							}
+						}
 						return false;
 					}
 

@@ -15,7 +15,7 @@
     <PackageTags>urldetector parser eladaus linkedin</PackageTags>
     <PackageId>eladaus.urldetector</PackageId>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
-    <PackageReleaseNotes>Make project dotnetstandard for portability</PackageReleaseNotes>
+    <PackageReleaseNotes>Make detected schemes configurable</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
