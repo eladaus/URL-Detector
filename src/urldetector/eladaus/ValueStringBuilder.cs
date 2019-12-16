@@ -15,6 +15,14 @@ namespace urldetector.eladaus
 		private int _pos;
 
 
+		public ValueStringBuilder(ReadOnlySpan<char> initialContent)
+		{
+			_arrayToReturnToPool = null;
+			_chars = initialContent.ToArray();
+			_pos = 0;
+		}
+
+
 		public ValueStringBuilder(string initialContent)
 		{
 			_arrayToReturnToPool = null;

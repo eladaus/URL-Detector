@@ -129,9 +129,9 @@ namespace urldetector
 		/// </summary>
 		/// <param name="host"></param>
 		/// <returns></returns>
-		private static byte[] TryDecodeHostToIPv4(string host)
+		private static byte[] TryDecodeHostToIPv4(ReadOnlySpan<char> host)
 		{
-			string[] parts = CharUtils.SplitByDot(host);
+			string[] parts = CharUtils.SplitByDot(host.ToString());
 			int numParts = parts.Length;
 
 			if (numParts != 4 && numParts != 1)
@@ -146,29 +146,29 @@ namespace urldetector
 			bytes[11] = (byte)0xff;
 			for (int i = 0; i < parts.Length; i++)
 			{
-				string parsedNum;
+				Span<char> parsedNum;
 				int @base;
 				if (parts[i].StartsWith("0x"))
 				{ 
 					//hex
-					parsedNum = parts[i].Substring(2);
+					parsedNum = parts[i].AsSpan().Slice(2).ToArray();
 					@base = 16;
 				}
 				else if (parts[i].StartsWith("0"))
 				{ 
 					//octal
-					parsedNum = parts[i].Substring(1);
+					parsedNum = parts[i].AsSpan().Slice(1).ToArray();
 					@base = 8;
 				}
 				else
 				{ 
 					//decimal
-					parsedNum = parts[i];
+					parsedNum = parts[i].ToCharArray();
 					@base = 10;
 				}
 
 				long section;
-				if (string.IsNullOrEmpty(parsedNum))
+				if (parsedNum == null || parsedNum.IsEmpty)
 				{
 					section = 0;
 				}
@@ -184,9 +184,9 @@ namespace urldetector
 								return null;
 							}
 						}
-						else if (8 == @base && OctalEncodingHelper.LooksLikeOctal(parsedNum.AsSpan()))
+						else if (8 == @base && OctalEncodingHelper.LooksLikeOctal(parsedNum))
 						{
-							section = Convert.ToInt32(parsedNum, @base);
+							section = Convert.ToInt32(parsedNum.ToString(), @base);
 						}
 						else
 						{
@@ -253,9 +253,9 @@ namespace urldetector
 
 			//Check for embedded ipv4 address
 			//string lastPart = parts.get(parts.size() - 1);
-			var lastPart = parts.Last();
-			var zoneIndexStart = lastPart.LastIndexOf("%", StringComparison.CurrentCultureIgnoreCase);
-			var lastPartWithoutZoneIndex = zoneIndexStart == -1 ? lastPart : lastPart.Substring(0, zoneIndexStart);
+			var lastPart = parts.Last().AsSpan();
+			var zoneIndexStart = lastPart.LastIndexOf("%");
+			var lastPartWithoutZoneIndex = zoneIndexStart == -1 ? lastPart : lastPart.Slice(0, zoneIndexStart);
 			byte[] ipv4Address = null;
 			if (!IsHexSection(lastPartWithoutZoneIndex))
 			{
@@ -309,7 +309,7 @@ namespace urldetector
 
 		}
 
-		private static bool IsHexSection(string section)
+		private static bool IsHexSection(ReadOnlySpan<char> section)
 		{
 			for (var i = 0; i < section.Length; i++)
 			{
