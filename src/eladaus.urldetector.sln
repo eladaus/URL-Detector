@@ -15,7 +15,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "documentation", "documentat
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "urldetector.tests.custom", "urldetector.tests.custom\urldetector.tests.custom.csproj", "{93C1935E-889A-4669-A716-B67654C3D13A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "urldetector.benchmarks", "urldetector.benchmarks\urldetector.benchmarks.csproj", "{04BC1A00-8761-446C-8113-23AA5789E5C3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "urldetector.benchmarks", "urldetector.benchmarks\urldetector.benchmarks.csproj", "{04BC1A00-8761-446C-8113-23AA5789E5C3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "urldetector.legacy", "urldetector.legacy\urldetector.legacy.csproj", "{E0A82CF2-A4DC-469D-A435-230CB489F528}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{04BC1A00-8761-446C-8113-23AA5789E5C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{04BC1A00-8761-446C-8113-23AA5789E5C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{04BC1A00-8761-446C-8113-23AA5789E5C3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E0A82CF2-A4DC-469D-A435-230CB489F528}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E0A82CF2-A4DC-469D-A435-230CB489F528}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E0A82CF2-A4DC-469D-A435-230CB489F528}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E0A82CF2-A4DC-469D-A435-230CB489F528}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
