@@ -1,8 +1,8 @@
 # URL Detector 
 
-This codebase is an open source C# port of the Java code in https://github.com/URL-Detector/URL-Detector, which in turn was a fork of the LinkedIn Engineering team's open sourced https://github.com/linkedin/URL-Detector, which seems to be abandoned. This port used the Java code as at July 20, 2019, and was created to allow continued maintenance by the OS C# community.
+This codebase is an open source C# port of the Java code in https://github.com/URL-Detector/URL-Detector, which in turn was a fork of the LinkedIn Engineering team's open sourced https://github.com/linkedin/URL-Detector, which seems to be abandoned. This port was originally based the Java code as at July 20, 2019, and was created to allow continued maintenance by the OS C# community.
 
-The library is also available as a Nuget package. For any and all future updates, the code releases will utilizing SemVer semantic versioning style. 
+For any and all future updates, the code releases will utilizing SemVer semantic versioning style. 
 
 Conveniently, eladaus.urldetector is [available on NuGet](https://www.nuget.org/packages/eladaus.url./) as `eladaus.urldetector`. Install it from NuGet Package Manager Console with:
 	
@@ -14,11 +14,11 @@ Install-Package eladaus.urldetector
 
 Currently, 3 test cases fail out of the original suite of over 350. This appears to be a difference between how Java and C# represent signed ints/bytes, however fixing this is currently low priority/backlogged.   
 
-That said, anyone who needs this fixed will be able to compare the C# port with the Java original to debug, and we welcome any contributions and pull-requests!
+That said, anyone who needs this fixed will be able to compare the C# port with the Java original to debug, and we welcome any contributions and pull-requests.
 
 ## Description
 
-The url detector is a library originally created by the Linkedin Security Team to detect and extract urls in a long piece of text.
+The url detector is a library originally created by the Linkedin Security Team to detect and extract urls in a body of text.
 
 It is able to find and detect any urls such as:
 
