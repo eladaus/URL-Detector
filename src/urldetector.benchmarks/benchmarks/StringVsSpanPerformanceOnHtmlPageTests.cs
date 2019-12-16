@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using BenchmarkDotNet.Attributes;
 using urldetector.detection;
+using urldetector.legacy.detection;
 
 namespace urldetector.benchmarks.benchmarks
 {
@@ -26,13 +27,33 @@ namespace urldetector.benchmarks.benchmarks
 			UrlDetectorOptions.XML
 		;
 
+		private static LegacyUrlDetectorOptions legacyFlags =>
+			LegacyUrlDetectorOptions.ALLOW_SINGLE_LEVEL_DOMAIN
+			|
+			LegacyUrlDetectorOptions.BRACKET_MATCH
+			|
+			LegacyUrlDetectorOptions.Default
+			|
+			LegacyUrlDetectorOptions.HTML
+			|
+			LegacyUrlDetectorOptions.JAVASCRIPT
+			|
+			LegacyUrlDetectorOptions.JSON
+			|
+			LegacyUrlDetectorOptions.QUOTE_MATCH
+			|
+			LegacyUrlDetectorOptions.SINGLE_QUOTE_MATCH
+			|
+			LegacyUrlDetectorOptions.XML
+		;
+
 		protected string InputText;
 
 
 		[Benchmark]
-		public void UrlParser_StringAndStringBuilder_LazyParse()
+		public void LegacyUrlParser_StringAndStringBuilder_LazyParse()
 		{
-			var links = new UrlDetector(InputText, flags).Detect();
+			var links = new LegacyUrlDetector(InputText, legacyFlags).Detect();
 		}
 
 
@@ -41,11 +62,12 @@ namespace urldetector.benchmarks.benchmarks
 		{
 			var links = new UrlDetector(InputText, flags).Detect();
 		}
+/*
 
 		[Benchmark]
-		public void UrlParser_StringAndStringBuilder_FullProcessing()
+		public void LegacyUrlParser_StringAndStringBuilder_FullProcessing()
 		{
-			var links = new UrlDetector(InputText, flags).Detect().Select(x => new
+			var links = new LegacyUrlDetector(InputText, legacyFlags).Detect().Select(x => new
 			{
 				Scheme = x.GetScheme(),
 				Fragment = x.GetFragment(),
@@ -79,6 +101,6 @@ namespace urldetector.benchmarks.benchmarks
 				Query = x.GetQuery(),
 				NormalizedUrl = x.Normalize()
 			}).ToList();
-		}
+		}*/
 	}
 }
