@@ -14,6 +14,14 @@ namespace urldetector.eladaus
 		private Span<char> _chars;
 		private int _pos;
 
+
+		public ValueStringBuilder(string initialContent)
+		{
+			_arrayToReturnToPool = null;
+			_chars = initialContent.ToCharArray();
+			_pos = 0;
+		}
+
 		public ValueStringBuilder(Span<char> initialBuffer)
 		{
 			_arrayToReturnToPool = null;

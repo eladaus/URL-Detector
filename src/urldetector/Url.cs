@@ -105,7 +105,7 @@ namespace urldetector
 		/// <returns></returns>
 		public string GetFullUrlWithoutFragment()
 		{
-			var url = new StringBuilder();
+			var url = new ValueStringBuilder();
 			if (!string.IsNullOrEmpty(GetScheme()))
 			{
 				url.Append(GetScheme());
@@ -130,7 +130,7 @@ namespace urldetector
 			if (GetPort() > 0 && GetPort() != SCHEME_PORT_MAP[GetScheme()])
 			{
 				url.Append(":");
-				url.Append(GetPort());
+				url.Append(GetPort().ToString());
 			}
 
 			url.Append(GetPath());

@@ -95,7 +95,7 @@ namespace urldetector
 		/// <returns></returns>
 		public static string Encode(string url)
 		{
-			var encoder = new StringBuilder();
+			var encoder = new ValueStringBuilder();
 			foreach (var chr in url.ToCharArray())
 			{
 				var chrByte = (byte) chr;

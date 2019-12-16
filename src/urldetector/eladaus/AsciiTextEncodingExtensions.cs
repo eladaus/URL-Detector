@@ -1,5 +1,4 @@
 ﻿using System.Globalization;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace urldetector.eladaus
@@ -14,7 +13,7 @@ namespace urldetector.eladaus
 		/// <returns></returns>
 		public static string EncodeNonAsciiCharacters( string value ) 
 		{
-			var sb = new StringBuilder();
+			var sb = new ValueStringBuilder();
 			foreach( char c in value ) 
 			{
 				if( c > 127 ) 

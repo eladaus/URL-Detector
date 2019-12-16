@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using urldetector.eladaus;
 
 namespace urldetector.detection
 {
@@ -90,7 +91,7 @@ namespace urldetector.detection
 		public static string[] SplitByDot(string input)
 		{
 			var splitList = new List<string>();
-			var section = new StringBuilder();
+			var section = new ValueStringBuilder();
 			if (string.IsNullOrEmpty(input))
 			{
 				return new[] {""};
