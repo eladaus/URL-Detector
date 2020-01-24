@@ -23,5 +23,16 @@ namespace urldetector.tests.custom
 
 			}
 		}
+
+		[Fact]
+		public void TestMailTo()
+		{
+			var inputText = $" mailTo:dale:blah@mytestsite.com and then mailto://me@test.com";
+			var urlDetector = new UrlDetector(inputText, UrlDetectorOptions.Default | UrlDetectorOptions.HTML);
+			var urls = urlDetector.Detect();
+			urls.ForEach(u => u.GetScheme());
+			urls.ForEach(u => u.GetHost());
+			Assert.Equal(2, urls.Count);
+		}
 	}
 }
