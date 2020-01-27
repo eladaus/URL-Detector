@@ -333,50 +333,40 @@ namespace urldetector.eladaus
 		/// ftp://
 		/// xfire://
 		/// </summary>
-		public static ImmutableHashSet<string> UriSchemeNamesSuffixed;
+		public static ImmutableHashSet<string> UriSchemeNamesSuffixed { get; }
 
 		/// <summary>
 		/// E.g.
 		/// ftp://
 		/// geo://
 		/// http://
+		/// mailto:
 		/// sftp://
 		/// https://
 		/// mailto://
 		/// </summary>
 		public static ImmutableList<string> UriSchemeNamesSuffixedOrdered { get; }
 
-		public static string UriSuffix => "://";
 
 		static UriSchemeLookup()
 		{
-			UriSchemeNamesSuffixed = UriSchemeNames.Select(u => $"{u}{UriSuffix}").ToImmutableHashSet();
+			UriSchemeNamesSuffixed = 
+				// Add all the schemes with the usually-but-not-always-followed '://' suffix
+				UriSchemeNames.Select(u => $"{u}://")
+					// Add those schemes that take a different, specific format (e.g. mailto, maybe geo uses ':' only)
+					.Union(
+						UriSchemeNames.Where(u => u == "mailto").Select(u => $"{u}:")
+					)
+					.ToImmutableHashSet();
 
 			UriSchemeNamesSuffixedOrdered = UriSchemeNamesSuffixed.OrderBy(usns => usns.Length).ThenBy(usns => usns).ToImmutableList();
 		}
 
-		
-		/// <summary>
-		/// E.g.
-		/// http://
-		/// ftp://
-		/// xfire://
-		/// </summary>
-		public static readonly ImmutableHashSet<string> UriSchemesSuffixed = 
-			// Add all the schemes with the usually-but-not-always-followed '://' suffix
-			UriSchemeNames.Select(u => $"{u}{UriDoubleSlashedSuffix}")
-				// Add those schemes that take a different, specific format (e.g. mailto, maybe geo uses ':' only)
-				.Union(
-					UriSchemeNames.Where(u => u == "mailto").Select(u => $"{u}:")
-				)
-				.ToImmutableHashSet();
-
-		public static string UriDoubleSlashedSuffix => "://";
 
 		public static string DesuffixUriScheme(string suffixedScheme)
 		{
-			var lastIndexOf = suffixedScheme.LastIndexOf(UriDoubleSlashedSuffix, StringComparison.CurrentCultureIgnoreCase);
-			return suffixedScheme.Substring(0, lastIndexOf);
+			var splitOnColonIndex = suffixedScheme.LastIndexOf(":", StringComparison.CurrentCultureIgnoreCase);
+			return suffixedScheme.Substring(0, splitOnColonIndex);
 		}
 	}
 }
