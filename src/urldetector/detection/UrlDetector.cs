@@ -213,7 +213,7 @@ namespace urldetector.detection
 						if (_options.HasFlag(UrlDetectorOptions.ALLOW_SINGLE_LEVEL_DOMAIN) && _buffer.Length > 0 && _hasScheme)
 						{
 							_reader.GoBack();
-							if (!ReadDomainName(_buffer.ToString().Substring(length)))
+							if (!ReadDomainName(_buffer.ToString(length)))
 							{
 								ReadEnd(ReadEndState.InvalidUrl);
 							};
@@ -239,7 +239,7 @@ namespace urldetector.detection
 								_buffer.Append(_reader.Read());
 								_buffer.Append(_reader.Read());
 
-								if (!ReadDomainName(_buffer.ToString().Substring(length)))
+								if (!ReadDomainName(_buffer.ToString(length)))
 								{
 									ReadEnd(ReadEndState.InvalidUrl);
 								}
@@ -253,7 +253,7 @@ namespace urldetector.detection
 					case '\uFF61':
 					case '.': //"." was found, read the domain name using the start from length.
 						_buffer.Append(curr);
-						if (!ReadDomainName(_buffer.ToString().Substring(length)))
+						if (!ReadDomainName(_buffer.ToString(length)))
 						{
 							ReadEnd(ReadEndState.InvalidUrl);
 						}
@@ -294,7 +294,7 @@ namespace urldetector.detection
 
 						_buffer.Append(curr);
 
-						if (!ReadDomainName(_buffer.ToString().Substring(length)))
+						if (!ReadDomainName(_buffer.ToString(length)))
 						{
 							//if we didn't find an ipv6 address, then check inside the brackets for urls
 							ReadEnd(ReadEndState.InvalidUrl);
@@ -317,7 +317,7 @@ namespace urldetector.detection
 
 							//unread this "/" and continue to check the domain name starting from the beginning of the domain
 							_reader.GoBack();
-							if (!ReadDomainName(_buffer.ToString().Substring(length)))
+							if (!ReadDomainName(_buffer.ToString(length)))
 							{
 								ReadEnd(ReadEndState.InvalidUrl);
 							}
@@ -359,7 +359,7 @@ namespace urldetector.detection
 
 			if (_options.HasFlag(UrlDetectorOptions.ALLOW_SINGLE_LEVEL_DOMAIN) && _buffer.Length > 0 && _hasScheme)
 			{
-				if (!ReadDomainName(_buffer.ToString().Substring(length)))
+				if (!ReadDomainName(_buffer.ToString(length)))
 				{
 					ReadEnd(ReadEndState.InvalidUrl);
 				}
@@ -393,7 +393,7 @@ namespace urldetector.detection
 					}
 
 					var backtrackOnFail = _reader.GetPosition() - _buffer.Length + length;
-					if (!ReadDomainName(_buffer.ToString().Substring(length)))
+					if (!ReadDomainName(_buffer.ToString(length)))
 					{
 						//go back to length location and restart search
 						_reader.Seek(backtrackOnFail);

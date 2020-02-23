@@ -32,7 +32,7 @@ namespace urldetector
 					{
 						var startIndex = i + 1;
 						var endIndex = i + 3;
-						var decodedChar = (char) Convert.ToInt16(stringBuilder.ToString().Substring(startIndex, endIndex-startIndex), 16);
+						var decodedChar = (char) Convert.ToInt16(stringBuilder.ToString(startIndex, endIndex-startIndex), 16);
 
 						stringBuilder.Remove(i, endIndex - i); //delete the % and two hex digits
 						stringBuilder.Insert(i, decodedChar); //add decoded character

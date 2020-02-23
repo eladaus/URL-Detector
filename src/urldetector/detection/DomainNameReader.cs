@@ -552,7 +552,7 @@ namespace urldetector.detection
 			//If the _currentLabelLength is not 0 then the last "." is not included so add it.
 			//Same with number of labels (or dots including the last)
 			var lastDotLength =
-				_buffer.Length > 3 && _buffer.ToString().Substring(_buffer.Length - 3).Equals("%" + HEX_ENCODED_DOT, StringComparison.CurrentCultureIgnoreCase)
+				_buffer.Length > 3 && _buffer.ToString(_buffer.Length - 3).Equals("%" + HEX_ENCODED_DOT, StringComparison.CurrentCultureIgnoreCase)
 					? 3
 					: 1;
 
@@ -564,12 +564,12 @@ namespace urldetector.detection
 			}
 			else if (_numeric)
 			{
-				var testDomain = _buffer.ToString().Substring(_startDomainName).ToLowerInvariant();
+				var testDomain = _buffer.ToString(_startDomainName).ToLowerInvariant();
 				valid = IsValidIpv4(testDomain);
 			}
 			else if (_seenBracket)
 			{
-				var testDomain = _buffer.ToString().Substring(_startDomainName).ToLowerInvariant();
+				var testDomain = _buffer.ToString(_startDomainName).ToLowerInvariant();
 				valid = IsValidIpv6(testDomain);
 			}
 			else if (_currentLabelLength > 0 && _dots >= 1 || _dots >= 2 && _currentLabelLength == 0
@@ -586,7 +586,7 @@ namespace urldetector.detection
 				// get the first 4 characters of the top level domain
 				// original
 				var endIndex = topStart + Math.Min(4, _buffer.Length - topStart);
-				var topLevelStart = _buffer.ToString().Substring(topStart, endIndex - topStart);
+				var topLevelStart = _buffer.ToString(topStart, endIndex - topStart);
 
 				//There is no size restriction if the top level domain is international (starts with "xn--")
 				valid =
