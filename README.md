@@ -4,7 +4,7 @@ This codebase is an open source C# port of the Java code in https://github.com/U
 
 For any and all future updates, the code releases will utilizing SemVer semantic versioning style. 
 
-Conveniently, eladaus.urldetector is [available on NuGet](https://www.nuget.org/packages/eladaus.url./) as `eladaus.urldetector`. Install it from NuGet Package Manager Console with:
+Conveniently, eladaus.urldetector is [available on NuGet](https://www.nuget.org/packages/eladaus.urldetector/) as `eladaus.urldetector`. Install it from NuGet Package Manager Console with:
 	
 ~~~~
 Install-Package eladaus.urldetector
