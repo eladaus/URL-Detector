@@ -146,18 +146,18 @@ namespace urldetector
 			bytes[11] = (byte)0xff;
 			for (int i = 0; i < parts.Length; i++)
 			{
-				string parsedNum;
+				ReadOnlySpan<char> parsedNum;
 				int @base;
 				if (parts[i].StartsWith("0x"))
 				{ 
 					//hex
-					parsedNum = parts[i].Substring(2);
+					parsedNum = parts[i].AsSpan(2);
 					@base = 16;
 				}
-				else if (parts[i].StartsWith("0"))
+				else if (parts[i].AsSpan(0) == "0" /* .StartsWith("0")*/)
 				{ 
 					//octal
-					parsedNum = parts[i].Substring(1);
+					parsedNum = parts[i].AsSpan(1);
 					@base = 8;
 				}
 				else

@@ -53,7 +53,7 @@ namespace urldetector.detection
 		/// <param name="numberChars"></param>
 		/// <returns></returns>
 		public string Peek(int numberChars)
-		{
+        {
 			return new string(_content, _index, numberChars);
 		}
 

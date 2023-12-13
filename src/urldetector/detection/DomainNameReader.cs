@@ -319,7 +319,7 @@ namespace urldetector.detection
 					if (newStart < _current.Length)
 					{
 						_buffer.Clear();
-						_buffer.Append(_current.Substring(newStart));
+						_buffer.Append(_current.AsSpan(newStart));
 
 						//_buffer.Replace(0, _buffer.Length(), _current.javaSubstring(newStart));
 
@@ -633,7 +633,7 @@ namespace urldetector.detection
 						if (testDomain.Length > 2 && testDomain[0] == '0' && testDomain[1] == 'x')
 						{
 							// hex
-							var isParsed = long.TryParse(testDomain.Substring(2), NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture, out value);
+							var isParsed = long.TryParse(testDomain.AsSpan(2), NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture, out value);
 							if (!isParsed)
 							{
 								return true;
@@ -642,10 +642,10 @@ namespace urldetector.detection
 						else if (testDomain[0] == '0')
 						{
 							// octal
-							var possibleDomain = testDomain.Substring(1);
-							if (OctalEncodingHelper.LooksLikeOctal(possibleDomain.AsSpan()))
+							var possibleDomain = testDomain.AsSpan(1);
+							if (OctalEncodingHelper.LooksLikeOctal(possibleDomain))
 							{
-								value = Convert.ToInt64(possibleDomain, 8);
+								value = Convert.ToInt64(possibleDomain.ToString(), 8);
 							}
 							else
 							{
@@ -681,18 +681,18 @@ namespace urldetector.detection
 						var part = parts[i];
 						if (part.Length > 0)
 						{
-							string parsedNum;
+							ReadOnlySpan<char> parsedNum;
 							int @base;
 							if (part.Length > 2 && part[0] == '0' && part[1] == 'x')
 							{
 								//dotted hex
-								parsedNum = part.Substring(2);
+								parsedNum = part.AsSpan(2);
 								@base = 16;
 							}
 							else if (part[0] == '0')
 							{
 								//dotted octal
-								parsedNum = part.Substring(1);
+								parsedNum = part.AsSpan(1);
 								@base = 8;
 							}
 							else
@@ -723,11 +723,11 @@ namespace urldetector.detection
 								else
 								{
 									// for other bases, fall back to try/catch
-									if (@base == 8 && OctalEncodingHelper.LooksLikeOctal(parsedNum.AsSpan()))
+									if (@base == 8 && OctalEncodingHelper.LooksLikeOctal(parsedNum))
 									{
 										try
 										{
-											section = Convert.ToInt32(parsedNum, @base);
+											section = Convert.ToInt32(parsedNum.ToString(), @base);
 										}
 										catch (Exception)
 										{
