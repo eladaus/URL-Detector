@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
 using BenchmarkDotNet.Columns;
 using BenchmarkDotNet.Configs;
-using BenchmarkDotNet.Horology;
 using BenchmarkDotNet.Reports;
 using BenchmarkDotNet.Running;
+using Perfolizer.Horology;
 
 //using BenchmarkDotNet.Columns;
 //using BenchmarkDotNet.Configs;
@@ -29,6 +30,7 @@ namespace urldetector.benchmarks
 			var configuration = new ManualConfig()
 			{
 				SummaryStyle = new SummaryStyle(
+                    CultureInfo.CurrentCulture, 
 					printUnitsInHeader: true,
 					sizeUnit: SizeUnit.KB,
 					timeUnit: TimeUnit.Millisecond,
