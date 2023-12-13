@@ -154,7 +154,7 @@ namespace urldetector
 					parsedNum = parts[i].AsSpan(2);
 					@base = 16;
 				}
-				else if (parts[i].AsSpan(0) == "0" /* .StartsWith("0")*/)
+				else if (parts[i].AsSpan(0).StartsWith("0"))
 				{ 
 					//octal
 					parsedNum = parts[i].AsSpan(1);
@@ -168,7 +168,7 @@ namespace urldetector
 				}
 
 				long section;
-				if (string.IsNullOrEmpty(parsedNum))
+				if (parsedNum == null || parsedNum.IsEmpty)
 				{
 					section = 0;
 				}
@@ -184,9 +184,9 @@ namespace urldetector
 								return null;
 							}
 						}
-						else if (8 == @base && OctalEncodingHelper.LooksLikeOctal(parsedNum.AsSpan()))
+						else if (8 == @base && OctalEncodingHelper.LooksLikeOctal(parsedNum))
 						{
-							section = Convert.ToInt32(parsedNum, @base);
+							section = Convert.ToInt32(parsedNum.ToString(), @base);
 						}
 						else
 						{
