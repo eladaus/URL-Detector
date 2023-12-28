@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Cysharp.Text;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -90,7 +91,7 @@ namespace urldetector.detection
 		public static string[] SplitByDot(string input)
 		{
 			var splitList = new List<string>();
-			var section = new StringBuilder();
+			var section = ZString.CreateStringBuilder(false);
 			if (string.IsNullOrEmpty(input))
 			{
 				return new[] {""};
@@ -103,14 +104,16 @@ namespace urldetector.detection
 				if (IsDot(curr))
 				{
 					splitList.Add(section.ToString());
-					section.Length = 0;
+					////section.Length = 0;
+                    section.Clear();
 				}
 				else if (curr == '%' && reader.CanReadChars(2) && reader.Peek(2).Equals("2e", StringComparison.InvariantCultureIgnoreCase))
 				{
 					reader.Read();
 					reader.Read(); //advance past the 2e
 					splitList.Add(section.ToString());
-					section.Length = 0;
+                    ////section.Length = 0;
+                    section.Clear();
 				}
 				else
 				{

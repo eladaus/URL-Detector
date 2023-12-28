@@ -23,7 +23,7 @@ namespace urldetector
 		private static readonly int NUMBER_BYTES_IN_IPV4 = 4;
 
 		public byte[] Bytes { get; private set; }
-		private string _host;
+		private readonly string _host;
 		private string _normalizedHost;
 
 		public HostNormalizer(string host)

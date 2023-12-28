@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Cysharp.Text;
+using System;
 using System.Globalization;
 using System.Text;
 using urldetector.eladaus;
@@ -782,7 +783,7 @@ namespace urldetector.detection
 			//char prevChar = 0;
 
 			//used to check ipv4 addresses at the end of ipv6 addresses.
-			var lastSection = new StringBuilder();
+            var lastSection = ZString.CreateStringBuilder(false);
 			var hexSection = true;
 
 			// If we see a '%'. Example: http://[::ffff:0xC0.0x00.0x02.0xEB%251]
