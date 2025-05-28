@@ -25,16 +25,13 @@ namespace urldetector.detection
 			InvalidUrl
 		}
 
-		///// <summary>
-		///// Contains the string to check for and remove if the scheme is this.
-		///// </summary>
-		//private static readonly string HTML_MAILTO = "mailto:";
-
+		
 		/// <summary>
 		/// Valid protocol schemes. 
 		/// </summary>
-		private HashSet<string> ValidSchemesSuffixed { get; } = new HashSet<string>();
-		private HashSet<string> ValidSchemesNames { get; } = new HashSet<string>();
+		private HashSet<string> ValidSchemesSuffixed { get; } = [];
+
+		private HashSet<string> ValidSchemesNames { get; } = [];
 		
 		private ImmutableArray<string> _validSchemesSuffixedOrdered;
 
@@ -44,7 +41,11 @@ namespace urldetector.detection
 			{
 				if (_validSchemesSuffixedOrdered == null)
 				{
-					_validSchemesSuffixedOrdered = ValidSchemesSuffixed.OrderBy(usns => usns.Length).ThenBy(usns => usns).ToImmutableArray();
+					_validSchemesSuffixedOrdered = [
+                        ..ValidSchemesSuffixed
+                            .OrderBy(usns => usns.Length)
+                            .ThenBy(usns => usns)
+                    ];
 				}
 
 				return _validSchemesSuffixedOrdered;
@@ -54,7 +55,7 @@ namespace urldetector.detection
 		/// <summary>
 		/// Take a list of strings like 'ftp', 'http', 'attachment' and append them as a full
 		/// searchable instance to the collection of schemes to find in the input, like
-		/// 'ftp://', 'ftp%3a//', 'http://', 'http%3a//' etc
+		/// 'ftp://', 'ftp%3a//', 'http://', 'http%3a//' etc.
 		/// </summary>
 		/// <param name="validSchemes"></param>
 		private void SetValidSchemes(IEnumerable<string> validSchemes)
@@ -75,7 +76,7 @@ namespace urldetector.detection
 		/// Maximum number of times a character at a particular index can be read by url detection algorithm before
 		/// we force it to be skipped over (to prevents excessive backtracking and infinite-loops)
 		/// </summary>
-		private static readonly int ContentReadByIndexMaximum = 10;
+		private static readonly int CONTENT_READ_BY_INDEX_MAXIMUM = 10;
 
 
 		/// <summary>
@@ -84,7 +85,7 @@ namespace urldetector.detection
 		/// <returns></returns>
 		public HashSet<string> ListValidSchemes()
 		{
-			return new HashSet<string>(ValidSchemesNames);
+			return [..ValidSchemesNames];
 		}
 
 
@@ -98,33 +99,30 @@ namespace urldetector.detection
 		/// </summary>
 		private readonly InputTextReader _reader;
 
-
 		/// <summary>
-		/// Buffer to store temporary urls inside of.
+		/// Buffer to store temporary urls inside.
 		/// </summary>
-		private readonly StringBuilder _buffer = new StringBuilder();
+		private readonly StringBuilder _buffer = new();
 
 		/// <summary>
 		/// Keeps the count of special characters used to match quotes and different types of brackets.
 		/// </summary>
-		private readonly Dictionary<char, int> _characterMatch = new Dictionary<char, int>();
+		private readonly Dictionary<char, int> _characterMatch = new();
 
 		/// <summary>
-		/// Keeps track of certain indices to create a Url object.
+		/// Keeps track of certain indices to create an Url object.
 		/// </summary>
-		private UrlMarker _currentUrlMarker = new UrlMarker();
+		private UrlMarker _currentUrlMarker = new();
 
 		/// <summary>
 		/// If we see a '[', didn't find an ipv6 address, and the bracket option is on, then look for urls inside the brackets.
 		/// </summary>
 		private bool _dontMatchIpv6;
 
-
 		/// <summary>
 		/// Has the scheme been found in this iteration?
 		/// </summary>
 		private bool _hasScheme;
-
 
 		/// <summary>
 		/// If the first character in the url is a quote, then look for matching quote at the end.
@@ -144,7 +142,7 @@ namespace urldetector.detection
 
 		/// <summary>
 		/// Creates a new UrlDetector object used to find urls inside of text.
-		/// @param content The content to search inside of.
+		/// @param content The content to search inside.
 		/// @param options The UrlDetectorOptions to use when detecting the content.
 		/// </summary>
 		/// <param name="content"></param>
@@ -155,10 +153,10 @@ namespace urldetector.detection
 			_reader = new InputTextReader(content);
 			_options = options;
 
-			if (validSchemes == null || validSchemes.Count == 0) validSchemes = new HashSet<string>
-			{
-				"http", "https", "ftp", "ftps"
-			};
+            if (validSchemes == null || validSchemes.Count == 0)
+            {
+                validSchemes = ["http", "https", "ftp", "ftps"];
+            }
 
 			SetValidSchemes(validSchemes);
 		}
@@ -192,13 +190,13 @@ namespace urldetector.detection
 			{
 
 				// We want to ensure that backtracking and looping on content is limited from infinite-loops, so 
-				// we take the hit and track each time an element in the input is read, and if its been hit too
+				// we take the hit and track each time an element in the input is read, and if it has been hit too
 				// many times, we step forwards until we find an element that has NOT been read too many times
 				var currentIndex = _reader.GetPosition();
 				contentReadByIndexCount[currentIndex] += 1;
-				while (contentReadByIndexCount[currentIndex] >= ContentReadByIndexMaximum)
+				while (contentReadByIndexCount[currentIndex] >= CONTENT_READ_BY_INDEX_MAXIMUM)
 				{
-					// Forcably step to the next character in the input, so we jump out of infinite loops
+					// Forcibly step to the next character in the input, so we jump out of infinite loops
 					_reader.Read();
 					currentIndex = _reader.GetPosition();
 				}

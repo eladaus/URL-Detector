@@ -23,7 +23,7 @@ namespace urldetector
 		private static readonly int NUMBER_BYTES_IN_IPV4 = 4;
 
 		public byte[] Bytes { get; private set; }
-		private string _host;
+		private readonly string _host;
 		private string _normalizedHost;
 
 		public HostNormalizer(string host)
@@ -107,12 +107,18 @@ namespace urldetector
 		/// <returns></returns>
 		private static byte[] TryDecodeHostToIp(string host)
 		{
-			if (host.StartsWith("[") && host.EndsWith("]"))
-			{
-				return TryDecodeHostToIPv6(host);
-			}
+            // null/empty check if needed:
+            if (host is null || host.Length < 3)
+            {
+                return null;
+            }
 
-			return TryDecodeHostToIPv4(host);
+            if (host[0] == '[' && host[^1] == ']')
+            {
+                return TryDecodeHostToIPv6(host);
+            }
+
+            return TryDecodeHostToIPv4(host);
 		}
 
 
@@ -146,18 +152,18 @@ namespace urldetector
 			bytes[11] = (byte)0xff;
 			for (int i = 0; i < parts.Length; i++)
 			{
-				string parsedNum;
+				ReadOnlySpan<char> parsedNum;
 				int @base;
 				if (parts[i].StartsWith("0x"))
 				{ 
 					//hex
-					parsedNum = parts[i].Substring(2);
+					parsedNum = parts[i].AsSpan(2);
 					@base = 16;
 				}
-				else if (parts[i].StartsWith("0"))
+				else if (parts[i][0] == '0')
 				{ 
 					//octal
-					parsedNum = parts[i].Substring(1);
+					parsedNum = parts[i].AsSpan(1);
 					@base = 8;
 				}
 				else
@@ -168,7 +174,7 @@ namespace urldetector
 				}
 
 				long section;
-				if (string.IsNullOrEmpty(parsedNum))
+				if (parsedNum == null || parsedNum.IsEmpty)
 				{
 					section = 0;
 				}
@@ -178,23 +184,29 @@ namespace urldetector
 					{
 						if (16 == @base)
 						{
-							var isParsed = long.TryParse(parsedNum, NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture, out section);
-							if (!isParsed)
-							{
-								return null;
-							}
+                            if (!long.TryParse(
+                                    parsedNum, 
+                                    NumberStyles.AllowHexSpecifier, 
+                                    CultureInfo.InvariantCulture, 
+                                    out section
+                                ))
+                            {
+                                return null;
+                            }
 						}
-						else if (8 == @base && OctalEncodingHelper.LooksLikeOctal(parsedNum.AsSpan()))
+						else if (8 == @base)
+                        {
+                            if (!OctalEncodingHelper.TryParseOctal(parsedNum, out section))
+                            {
+                                return null;
+                            }
+                        }
+                        else
 						{
-							section = Convert.ToInt32(parsedNum, @base);
-						}
-						else
-						{
-							var isParsed = long.TryParse(parsedNum, out section);
-							if (!isParsed)
-							{
-								return null;
-							}
+                            if (!long.TryParse(parsedNum, out section))
+                            {
+                                return null;
+                            }
 						}
 					}
 					catch (Exception)
@@ -242,7 +254,8 @@ namespace urldetector
 		/// <returns></returns>
 		private static byte[] TryDecodeHostToIPv6(string host)
 		{
-			var ip = host.Substring(1, host.Length - 2);
+            // Would expect ip to be wrapped in [ and ]
+			var ip = host[1..^1];
 
 			var parts = new List<string>(ip.Split(':'));
 
@@ -255,7 +268,7 @@ namespace urldetector
 			//string lastPart = parts.get(parts.size() - 1);
 			var lastPart = parts.Last();
 			var zoneIndexStart = lastPart.LastIndexOf("%", StringComparison.CurrentCultureIgnoreCase);
-			var lastPartWithoutZoneIndex = zoneIndexStart == -1 ? lastPart : lastPart.Substring(0, zoneIndexStart);
+			var lastPartWithoutZoneIndex = zoneIndexStart == -1 ? lastPart : lastPart[..zoneIndexStart];
 			byte[] ipv4Address = null;
 			if (!IsHexSection(lastPartWithoutZoneIndex))
 			{

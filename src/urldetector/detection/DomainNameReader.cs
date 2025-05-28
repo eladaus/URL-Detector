@@ -77,12 +77,12 @@ namespace urldetector.detection
 		private static readonly long MIN_NUMERIC_DOMAIN_VALUE = 16843008L;
 
 		/// <summary>
-		/// If the domain name is an ip address, for each part of the address, whats the minimum value?
+		/// If the domain name is an ip address, for each part of the address, what is the minimum value?
 		/// </summary>
 		private static readonly int MIN_IP_PART = 0;
 
 		/// <summary>
-		/// If the domain name is an ip address, for each part of the address, whats the maximum value?
+		/// If the domain name is an ip address, for each part of the address, what is the maximum value?
 		/// </summary>
 		private static readonly int MAX_IP_PART = 255;
 
@@ -107,10 +107,15 @@ namespace urldetector.detection
 		/// </summary>
 		private static readonly int MAX_DOMAIN_LENGTH = 255;
 
-		/// <summary>
-		/// Encoded hex dot.
-		/// </summary>
-		private static readonly string HEX_ENCODED_DOT = "2e";
+        /// <summary>
+        /// Encoded hex dot.
+        /// </summary>
+        private static readonly string HEX_ENCODED_DOT = "2e";
+
+        /// <summary>
+        /// Encoded hex dot.
+        /// </summary>
+        private static readonly string PERCENT_HEX_ENCODED_DOT = "%" + HEX_ENCODED_DOT;
 
 		/// <summary>
 		/// Contains the handler for each character match.
@@ -134,7 +139,7 @@ namespace urldetector.detection
 		private readonly string _current;
 
 		/// <summary>
-		/// Keeps track of the number of characters since the last "."
+		/// Keeps track of the number of characters since the last "." character
 		/// </summary>
 		private int _currentLabelLength;
 
@@ -164,7 +169,7 @@ namespace urldetector.detection
 		private bool _seenCompleteBracketSet;
 
 		/// <summary>
-		/// Keeps track where the domain name started. This is non zero if the buffer starts with
+		/// Keeps track where the domain name started. This is non-zero if the buffer starts with
 		/// http://username:password@...
 		/// </summary>
 		private int _startDomainName;
@@ -193,7 +198,6 @@ namespace urldetector.detection
 			StringBuilder buffer,
 			string current,
 			UrlDetectorOptions options,
-			//CharacterHandler characterHandler
 			Action<char> characterHandler
 		)
 		{
@@ -213,13 +217,13 @@ namespace urldetector.detection
 		{
 			if (_current != null)
 			{
-				//Handles the case where the string is ".hello"
+				// Handles the case where the string is ".hello"
 				if (_current.Length == 1 && CharUtils.IsDot(_current[0]))
 				{
 					return ReaderNextState.InvalidDomainName;
 				}
 
-				if (_current.Length == 3 && _current.Equals("%" + HEX_ENCODED_DOT, StringComparison.InvariantCultureIgnoreCase))
+				if (_current.Equals(PERCENT_HEX_ENCODED_DOT, StringComparison.OrdinalIgnoreCase))
 				{
 					return ReaderNextState.InvalidDomainName;
 				}
@@ -233,11 +237,10 @@ namespace urldetector.detection
 				//If an invalid char is found, we can just restart the domain from there.
 				var newStart = 0;
 
-				var currArray = _current.ToCharArray();
-				var length = currArray.Length;
+				var length = _current.Length;
 
 				//hex special case
-				var isAllHexSoFar = length > 2 && currArray[0] == '0' && (currArray[1] == 'x' || currArray[1] == 'X');
+				var isAllHexSoFar = length > 2 && _current[0] == '0' && (_current[1] == 'x' || _current[1] == 'X');
 
 				var index = isAllHexSoFar ? 2 : 0;
 				var done = false;
@@ -245,7 +248,7 @@ namespace urldetector.detection
 				while (index < length && !done)
 				{
 					//get the current character and update length counts.
-					var curr = currArray[index];
+					var curr = _current[index];
 					_currentLabelLength++;
 					_topLevelLength = _currentLabelLength;
 
@@ -266,11 +269,11 @@ namespace urldetector.detection
 						_seenBracket = true;
 						_numeric = false;
 					}
-					else if (curr == '%' && index + 2 < length && CharUtils.IsHex(currArray[index + 1])
-					         && CharUtils.IsHex(currArray[index + 2]))
+					else if (curr == '%' && index + 2 < length && CharUtils.IsHex(_current[index + 1])
+					         && CharUtils.IsHex(_current[index + 2]))
 					{
 						//handle url encoded dot
-						if (currArray[index + 1] == '2' && currArray[index + 2] == 'e')
+						if (_current[index + 1] == '2' && _current[index + 2] == 'e')
 						{
 							_dots++;
 							_currentLabelLength = 0;
@@ -298,7 +301,7 @@ namespace urldetector.detection
 					}
 					else if (!CharUtils.IsNumeric(curr) && !_options.HasFlag(UrlDetectorOptions.ALLOW_SINGLE_LEVEL_DOMAIN))
 					{
-						//if its not _numeric and not alphabetical, then restart searching for a domain from this point.
+						//if it is not _numeric and not alphabetical, then restart searching for a domain from this point.
 						newStart = index + 1;
 						_currentLabelLength = 0;
 						_topLevelLength = 0;
@@ -310,25 +313,24 @@ namespace urldetector.detection
 					index++;
 				}
 
-				//An invalid character for the domain was found somewhere in the current buffer.
-				//cut the first part of the domain out. For example:
+				// An invalid character for the domain was found somewhere in the current buffer.
+				// cut the first part of the domain out. For example:
 				// http://asdf%asdf.google.com <- asdf.google.com is still valid, so restart from the %
 				if (newStart > 0)
 				{
-					//make sure the location is not at the end. Otherwise the thing is just invalid.
+					// make sure the location is not at the end. Otherwise, the thing is just invalid.
 					if (newStart < _current.Length)
 					{
 						_buffer.Clear();
-						_buffer.Append(_current.Substring(newStart));
+						_buffer.Append(_current.AsSpan(newStart));
 
-						//_buffer.Replace(0, _buffer.Length(), _current.javaSubstring(newStart));
-
-						//cut out the previous part, so now the domain name has to be from here.
+						// cut out the previous part, so now the domain name has to be from here.
 						_startDomainName = 0;
 					}
 
-					//now after cutting if the buffer is just "." newStart > current (last character in current is invalid)
-					if (newStart >= _current.Length || _buffer.ToString().Equals("."))
+					// now after cutting if the buffer is just "." newStart > current
+					// (last character in current is invalid)
+					if (newStart >= _current.Length || (_buffer.Length == 1 && _buffer[0] == '.'))
 					{
 						return ReaderNextState.InvalidDomainName;
 					}
@@ -359,8 +361,11 @@ namespace urldetector.detection
 			//If this is the first domain part, check if it's ip address in is hexa
 			//similar to what is done on 'readCurrent' method
 			bool isAllHexSoFar = (_current == null || _current.Equals(""))
-			                        && _reader.CanReadChars(3) &&
-			                        ("0x".Equals(_reader.Peek(2), StringComparison.InvariantCultureIgnoreCase));
+			                     && _reader.CanReadChars(3) 
+                                 && _reader.Peek(2).Equals(// ReadOnlySpan<char>
+                                     "0x",                // implicitly converted to ReadOnlySpan<char>
+                                     StringComparison.InvariantCultureIgnoreCase
+                                 );
 
 			if (isAllHexSoFar) 
 			{
@@ -408,11 +413,11 @@ namespace urldetector.detection
 					return ReaderNextState.ReadUserPass;
 				}
 				else if (CharUtils.IsDot(curr)
-				    || curr == '%' && _reader.CanReadChars(2) && _reader.Peek(2).Equals(HEX_ENCODED_DOT, StringComparison.InvariantCultureIgnoreCase))
+				    || curr == '%' && _reader.CanReadChars(2) && _reader.Peek(2).Equals(HEX_ENCODED_DOT, StringComparison.OrdinalIgnoreCase))
 				{
-					//if the current character is a dot or a urlEncodedDot
+					// if the current character is a dot or a urlEncodedDot
 
-					//handles the case: hello..
+					// handles the case: hello..
 					if (_currentLabelLength < 1)
 					{
 						done = true;
@@ -552,7 +557,7 @@ namespace urldetector.detection
 			//If the _currentLabelLength is not 0 then the last "." is not included so add it.
 			//Same with number of labels (or dots including the last)
 			var lastDotLength =
-				_buffer.Length > 3 && _buffer.ToString(_buffer.Length - 3).Equals("%" + HEX_ENCODED_DOT, StringComparison.CurrentCultureIgnoreCase)
+				_buffer.Length > 3 && _buffer.ToString(_buffer.Length - 3).Equals(PERCENT_HEX_ENCODED_DOT, StringComparison.OrdinalIgnoreCase)
 					? 3
 					: 1;
 
@@ -633,7 +638,7 @@ namespace urldetector.detection
 						if (testDomain.Length > 2 && testDomain[0] == '0' && testDomain[1] == 'x')
 						{
 							// hex
-							var isParsed = long.TryParse(testDomain.Substring(2), NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture, out value);
+							var isParsed = long.TryParse(testDomain.AsSpan(2), NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture, out value);
 							if (!isParsed)
 							{
 								return true;
@@ -642,16 +647,12 @@ namespace urldetector.detection
 						else if (testDomain[0] == '0')
 						{
 							// octal
-							var possibleDomain = testDomain.Substring(1);
-							if (OctalEncodingHelper.LooksLikeOctal(possibleDomain.AsSpan()))
-							{
-								value = Convert.ToInt64(possibleDomain, 8);
-							}
-							else
-							{
-								return false;
-							}
-						}
+							var possibleDomain = testDomain.AsSpan(1);
+                            if (!OctalEncodingHelper.TryParseOctal(possibleDomain, out value))
+                            {
+                                return false;
+                            }
+                        }
 						else
 						{
 							// decimal
@@ -671,7 +672,7 @@ namespace urldetector.detection
 				}
 				else if (_dots == 3)
 				{
-					//Dotted decimal/hex/octal format
+					// Dotted decimal/hex/octal format
 					var parts = CharUtils.SplitByDot(testDomain);
 					valid = true;
 
@@ -681,18 +682,18 @@ namespace urldetector.detection
 						var part = parts[i];
 						if (part.Length > 0)
 						{
-							string parsedNum;
+							ReadOnlySpan<char> parsedNum;
 							int @base;
 							if (part.Length > 2 && part[0] == '0' && part[1] == 'x')
 							{
 								//dotted hex
-								parsedNum = part.Substring(2);
+								parsedNum = part.AsSpan(2);
 								@base = 16;
 							}
 							else if (part[0] == '0')
 							{
 								//dotted octal
-								parsedNum = part.Substring(1);
+								parsedNum = part.AsSpan(1);
 								@base = 8;
 							}
 							else
@@ -709,7 +710,7 @@ namespace urldetector.detection
 							}
 							else
 							{
-								// For efficiency, we try to avoid try/catch and instead use tryparse
+								// For efficiency, we try to avoid try/catch and instead use TryParse
 								if (@base == 16)
 								{
 									var isParsed = int.TryParse(parsedNum, NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture, out section);
@@ -723,22 +724,17 @@ namespace urldetector.detection
 								else
 								{
 									// for other bases, fall back to try/catch
-									if (@base == 8 && OctalEncodingHelper.LooksLikeOctal(parsedNum.AsSpan()))
-									{
-										try
-										{
-											section = Convert.ToInt32(parsedNum, @base);
-										}
-										catch (Exception)
-										{
-											return false;
-										}
-									}
-									else
-									{
-										return false;
-									}
-									
+                                    if (@base == 8)
+                                    {
+                                        if (!OctalEncodingHelper.TryParseOctal(parsedNum, out section))
+                                        {
+                                            return false;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        return false;
+                                    }
 								}
 							}
 
@@ -765,13 +761,11 @@ namespace urldetector.detection
 		/// </summary>
 		private bool IsValidIpv6(string testDomain)
 		{
-			var domainArray = testDomain.ToCharArray();
-
 			// Return false if we don't see [....]
 			// or if we only have '[]'
 			// or if we detect [:8000: ...]; only [::8000: ...] is okay
-			if (domainArray.Length < 3 || domainArray[domainArray.Length - 1] != ']' || domainArray[0] != '['
-			    || domainArray[1] == ':' && domainArray[2] != ':')
+			if (testDomain.Length < 3 || testDomain[^1] != ']' || testDomain[0] != '['
+                || testDomain[1] == ':' && testDomain[2] != ':')
 			{
 				return false;
 			}
@@ -779,10 +773,9 @@ namespace urldetector.detection
 			var numSections = 1;
 			var hexDigits = 0;
 			var prevChar = '\0';
-			//char prevChar = 0;
 
 			//used to check ipv4 addresses at the end of ipv6 addresses.
-			var lastSection = new StringBuilder();
+            var lastSection = new StringBuilder();
 			var hexSection = true;
 
 			// If we see a '%'. Example: http://[::ffff:0xC0.0x00.0x02.0xEB%251]
@@ -792,18 +785,18 @@ namespace urldetector.detection
 			var doubleColonFlag = false;
 
 			var index = 0;
-			for (; index < domainArray.Length; index++)
+			for (; index < testDomain.Length; index++)
 			{
-				switch (domainArray[index])
+				switch (testDomain[index])
 				{
 					case '[': //found beginning of ipv6 address
 						break;
 					case '%':
 					case ']': //found end of ipv6 address
-						if (domainArray[index] == '%')
+						if (testDomain[index] == '%')
 						{
-							//see if there's a urlencoded dot
-							if (domainArray.Length - index >= 2 && domainArray[index + 1] == '2' && domainArray[index + 2] == 'e')
+							//see if there's an urlencoded dot
+							if (testDomain.Length - index >= 2 && testDomain[index + 1] == '2' && testDomain[index + 2] == 'e')
 							{
 								lastSection.Append("%2e");
 								index += 2;
@@ -814,7 +807,7 @@ namespace urldetector.detection
 							zoneIndiceMode = true;
 						}
 
-						if (!hexSection && (!zoneIndiceMode || domainArray[index] == '%'))
+						if (!hexSection && (!zoneIndiceMode || testDomain[index] == '%'))
 						{
 							if (IsValidIpv4(lastSection.ToString()))
 							{
@@ -853,15 +846,15 @@ namespace urldetector.detection
 					default:
 						if (zoneIndiceMode)
 						{
-							if (!CharUtils.IsUnreserved(domainArray[index]))
+							if (!CharUtils.IsUnreserved(testDomain[index]))
 							{
 								return false;
 							}
 						}
 						else
 						{
-							lastSection.Append(domainArray[index]); //collect our possible ipv4 address
-							if (hexSection && CharUtils.IsHex(domainArray[index]))
+							lastSection.Append(testDomain[index]); //collect our possible ipv4 address
+							if (hexSection && CharUtils.IsHex(testDomain[index]))
 							{
 								hexDigits++;
 							}
@@ -879,7 +872,7 @@ namespace urldetector.detection
 					return false;
 				}
 
-				prevChar = domainArray[index];
+				prevChar = testDomain[index];
 			}
 
 			//numSections != 1 checks for things like: [adf]

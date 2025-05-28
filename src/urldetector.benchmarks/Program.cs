@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Globalization;
 using System.Linq;
-using BenchmarkDotNet.Columns;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Reports;
 using BenchmarkDotNet.Running;
 using Perfolizer.Horology;
+using Perfolizer.Metrology;
 
 //using BenchmarkDotNet.Columns;
 //using BenchmarkDotNet.Configs;
@@ -19,7 +19,7 @@ namespace urldetector.benchmarks
 	{
 		static void Main(string[] args)
 		{
-			Console.WriteLine("Hello Benchmarker!");
+			Console.WriteLine("Hello BenchMarker!");
 
 			RunBenchmarks(args);
 		}
@@ -38,9 +38,9 @@ namespace urldetector.benchmarks
 					printZeroValuesInContent: true)
 			};
 
-			configuration.Add(DefaultConfig.Instance.GetExporters().ToArray());
-			configuration.Add(DefaultConfig.Instance.GetLoggers().ToArray());
-			configuration.Add(DefaultConfig.Instance.GetColumnProviders().ToArray());
+			configuration.AddExporter(DefaultConfig.Instance.GetExporters().ToArray());
+			configuration.AddLogger(DefaultConfig.Instance.GetLoggers().ToArray());
+			configuration.AddColumnProvider(DefaultConfig.Instance.GetColumnProviders().ToArray());
 
 			// Run the benchmarks
 			var summary = BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args, configuration);

@@ -117,10 +117,10 @@ namespace urldetector.eladaus
 				"irc6",
 				"ircs",
 				"iris",
-				////"iris.beep",
-				////"iris.lwz",
-				////"iris.xpc",
-				////"iris.xpcs",
+                // "iris.beep",
+                // "iris.lwz",
+                // "iris.xpc",
+				// "iris.xpcs",
 				"isostore",
 				"itms",
 				"jabber",
@@ -139,9 +139,9 @@ namespace urldetector.eladaus
 				"maps",
 				"market",
 				"message",
-				////"microsoft.windows.camera",
-				////"microsoft.windows.camera.multipicker",
-				////"microsoft.windows.camera.picker",
+				// "microsoft.windows.camera",
+				// "microsoft.windows.camera.multipicker",
+				// "microsoft.windows.camera.picker",
 				"mid",
 				"mms",
 				"modem",
@@ -270,8 +270,8 @@ namespace urldetector.eladaus
 				"smtp",
 				"snews",
 				"snmp",
-				////"soap.beep",
-				////"soap.beeps",
+				// "soap.beep",
+				// "soap.beeps",
 				"soldat",
 				"spiffe",
 				"spotify",
@@ -315,14 +315,14 @@ namespace urldetector.eladaus
 				"xcon",
 				"xcon-userid",
 				"xfire",
-				////"xmlrpc.beep",
-				////"xmlrpc.beeps",
+				// "xmlrpc.beep",
+				// "xmlrpc.beeps",
 				"xmpp",
 				"xri",
 				"ymsgr",
-				////"z39.50",
-				////"z39.50r",
-				////"z39.50s"
+				// "z39.50",
+				// "z39.50r",
+				// "z39.50s"
 				}
 			);
 
@@ -366,7 +366,7 @@ namespace urldetector.eladaus
 		public static string DesuffixUriScheme(string suffixedScheme)
 		{
 			var splitOnColonIndex = suffixedScheme.LastIndexOf(":", StringComparison.CurrentCultureIgnoreCase);
-			return suffixedScheme.Substring(0, splitOnColonIndex);
+			return suffixedScheme[..splitOnColonIndex];
 		}
 	}
 }
