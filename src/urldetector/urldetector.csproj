@@ -23,10 +23,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<None Include="LICENSE.txt" Pack="true" PackagePath="" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="GitVersion.MsBuild" Version="6.3.0">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -35,4 +31,14 @@
 		<PackageReference Include="System.Memory" Version="4.6.3" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<!-- point to the actual file on disk -->
+		<None Include="..\\..\\LICENSE.txt">
+			<!-- include it in the nupkg -->
+			<Pack>true</Pack>
+			<!-- place it at the root of the package as LICENSE.txt -->
+			<PackagePath></PackagePath>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
 </Project>
