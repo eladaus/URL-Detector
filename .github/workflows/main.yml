@@ -3,8 +3,8 @@ name: Publish NuGet Package
 
 on:
   push:
-    branches:
-      - master
+    tags:
+      - '*.*.*'        # ← only fires when you push a tag with semver format
 
 jobs:
   publish:
@@ -16,7 +16,7 @@ jobs:
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '7.0.x'
 
       - name: Cache NuGet packages
         uses: actions/cache@v3
