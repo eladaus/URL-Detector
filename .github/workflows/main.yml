@@ -26,9 +26,10 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles(env.PROJECT_PATH + '/**/*.csproj') }}
+          key: ${{ runner.os }}-nuget-${{ hashFiles(format('{0}/**/*.csproj', env.PROJECT_PATH)) }}
           restore-keys: |
             ${{ runner.os }}-nuget-
+            ${{ runner.os }}-nuget-${{ hashFiles(format('{0}/**/*.csproj', env.PROJECT_PATH)) }}
 
       - name: Restore dependencies
         working-directory: ${{ env.PROJECT_PATH }}
