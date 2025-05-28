@@ -16,7 +16,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-
+        with:
+          # 👇 pull every branch & tag so GitVersion can see full history
+          fetch-depth: 0
+          # 👇 (optional) ensure it checks out the exact tag that triggered the run
+          ref: ${{ github.ref }}
+          
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v3
         with:
