@@ -1,37 +1,40 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Authors>Dale Holborow (C# port), LinkedIn (original Java)</Authors>
-    <Company>eladaus oy</Company>
-    <Product>eladaus.urldetector</Product>
-    <Description>C# port of the LinkedIn engineering team's open source Java library to detect urls from a body of text. See https://github.com/eladaus/URL-Detector</Description>
-    <PackageLicenseExpression></PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/eladaus/URL-Detector</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/eladaus/URL-Detector</RepositoryUrl>
-    <RepositoryType>GIT</RepositoryType>
-    <PackageTags>urldetector parser eladaus linkedin</PackageTags>
-    <PackageId>eladaus.urldetector</PackageId>
-    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
-    <PackageReleaseNotes>Fix infinite-loop on parsing bug</PackageReleaseNotes>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+		<Authors>Dale Holborow (C# port), LinkedIn (original Java)</Authors>
+		<Company>eladaus oy</Company>
+		<Product>eladaus.urldetector</Product>
+		<Description>
+			C# port of the LinkedIn engineering team's open source Java library
+			to detect urls from a body of text. See
+			https://github.com/eladaus/URL-Detector
+		</Description>
+		<PackageLicenseExpression></PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/eladaus/URL-Detector</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/eladaus/URL-Detector</RepositoryUrl>
+		<RepositoryType>GIT</RepositoryType>
+		<PackageTags>urldetector parser eladaus linkedin</PackageTags>
+		<PackageId>eladaus.urldetector</PackageId>
+		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+		<PackageReleaseNotes>Fix infinite-loop on parsing bug</PackageReleaseNotes>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <None Include="..\..\LICENSE.txt" Link="LICENSE.txt">
-      <PackagePath></PackagePath>
-      <Pack>True</Pack>
-    </None>
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="..\..\LICENSE.txt" Link="LICENSE.txt">
+			<Pack>True</Pack>
+		</None>
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="GitVersionTask" Version="5.1.2">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="System.Collections.Immutable" Version="1.3.0" />
-    <PackageReference Include="System.Memory" Version="4.5.3" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="GitVersion.MsBuild" Version="6.3.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="System.Collections.Immutable" Version="9.0.5" />
+		<PackageReference Include="System.Memory" Version="4.6.3" />
+	</ItemGroup>
 
 </Project>

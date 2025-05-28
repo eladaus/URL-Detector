@@ -63,7 +63,7 @@ namespace urldetector.detection
 
 		
 		/// <summary>
-		/// Checks if character is a dot. Heres the doc:
+		/// Checks if character is a dot. Here is the doc:
 		/// http://docs.oracle.com/javase/6/docs/api/java/net/IDN.html#toASCII%28java.lang.String,%20int%29
 		/// </summary>
 		/// <param name="a"></param>
@@ -90,10 +90,10 @@ namespace urldetector.detection
 		public static string[] SplitByDot(string input)
 		{
 			var splitList = new List<string>();
-			var section = new StringBuilder();
+            var section = new StringBuilder();
 			if (string.IsNullOrEmpty(input))
 			{
-				return new[] {""};
+				return [""];
 			}
 
 			var reader = new InputTextReader(input);
@@ -103,14 +103,18 @@ namespace urldetector.detection
 				if (IsDot(curr))
 				{
 					splitList.Add(section.ToString());
-					section.Length = 0;
+                    section.Clear();
 				}
-				else if (curr == '%' && reader.CanReadChars(2) && reader.Peek(2).Equals("2e", StringComparison.InvariantCultureIgnoreCase))
+				else if (
+                    curr == '%' 
+                    && reader.CanReadChars(2) 
+                    && reader.Peek(2).Equals("2e", StringComparison.OrdinalIgnoreCase)
+                )
 				{
 					reader.Read();
 					reader.Read(); //advance past the 2e
 					splitList.Add(section.ToString());
-					section.Length = 0;
+                    section.Clear();
 				}
 				else
 				{

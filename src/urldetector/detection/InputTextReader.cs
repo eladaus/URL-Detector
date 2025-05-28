@@ -11,7 +11,7 @@ namespace urldetector.detection
 		/// <summary>
 		/// The content to read.
 		/// </summary>
-		private readonly char[] _content;
+		private readonly string _content;
 
 		/// <summary>
 		/// Total length of the input character array
@@ -30,8 +30,8 @@ namespace urldetector.detection
 		/// <param name="content">param content The content to read.</param>
 		public InputTextReader(string content)
 		{
-			_content = content.ToCharArray();
-		}
+            _content = content;
+        }
 
 
 		/// <summary>
@@ -53,8 +53,8 @@ namespace urldetector.detection
 		/// <param name="numberChars"></param>
 		/// <returns></returns>
 		public string Peek(int numberChars)
-		{
-			return new string(_content, _index, numberChars);
+        {
+            return _content.Substring(_index, numberChars);
 		}
 
 

@@ -117,10 +117,10 @@ namespace urldetector.eladaus
 				"irc6",
 				"ircs",
 				"iris",
-				////"iris.beep",
-				////"iris.lwz",
-				////"iris.xpc",
-				////"iris.xpcs",
+                // "iris.beep",
+                // "iris.lwz",
+                // "iris.xpc",
+				// "iris.xpcs",
 				"isostore",
 				"itms",
 				"jabber",
@@ -139,9 +139,9 @@ namespace urldetector.eladaus
 				"maps",
 				"market",
 				"message",
-				////"microsoft.windows.camera",
-				////"microsoft.windows.camera.multipicker",
-				////"microsoft.windows.camera.picker",
+				// "microsoft.windows.camera",
+				// "microsoft.windows.camera.multipicker",
+				// "microsoft.windows.camera.picker",
 				"mid",
 				"mms",
 				"modem",
@@ -270,8 +270,8 @@ namespace urldetector.eladaus
 				"smtp",
 				"snews",
 				"snmp",
-				////"soap.beep",
-				////"soap.beeps",
+				// "soap.beep",
+				// "soap.beeps",
 				"soldat",
 				"spiffe",
 				"spotify",
@@ -315,14 +315,14 @@ namespace urldetector.eladaus
 				"xcon",
 				"xcon-userid",
 				"xfire",
-				////"xmlrpc.beep",
-				////"xmlrpc.beeps",
+				// "xmlrpc.beep",
+				// "xmlrpc.beeps",
 				"xmpp",
 				"xri",
 				"ymsgr",
-				////"z39.50",
-				////"z39.50r",
-				////"z39.50s"
+				// "z39.50",
+				// "z39.50r",
+				// "z39.50s"
 				}
 			);
 
@@ -333,50 +333,40 @@ namespace urldetector.eladaus
 		/// ftp://
 		/// xfire://
 		/// </summary>
-		public static ImmutableHashSet<string> UriSchemeNamesSuffixed;
+		public static ImmutableHashSet<string> UriSchemeNamesSuffixed { get; }
 
 		/// <summary>
 		/// E.g.
 		/// ftp://
 		/// geo://
 		/// http://
+		/// mailto:
 		/// sftp://
 		/// https://
 		/// mailto://
 		/// </summary>
 		public static ImmutableList<string> UriSchemeNamesSuffixedOrdered { get; }
 
-		public static string UriSuffix => "://";
 
 		static UriSchemeLookup()
 		{
-			UriSchemeNamesSuffixed = UriSchemeNames.Select(u => $"{u}{UriSuffix}").ToImmutableHashSet();
+			UriSchemeNamesSuffixed = 
+				// Add all the schemes with the usually-but-not-always-followed '://' suffix
+				UriSchemeNames.Select(u => $"{u}://")
+					// Add those schemes that take a different, specific format (e.g. mailto, maybe geo uses ':' only)
+					.Union(
+						UriSchemeNames.Where(u => u == "mailto").Select(u => $"{u}:")
+					)
+					.ToImmutableHashSet();
 
 			UriSchemeNamesSuffixedOrdered = UriSchemeNamesSuffixed.OrderBy(usns => usns.Length).ThenBy(usns => usns).ToImmutableList();
 		}
 
-		
-		/// <summary>
-		/// E.g.
-		/// http://
-		/// ftp://
-		/// xfire://
-		/// </summary>
-		public static readonly ImmutableHashSet<string> UriSchemesSuffixed = 
-			// Add all the schemes with the usually-but-not-always-followed '://' suffix
-			UriSchemeNames.Select(u => $"{u}{UriDoubleSlashedSuffix}")
-				// Add those schemes that take a different, specific format (e.g. mailto, maybe geo uses ':' only)
-				.Union(
-					UriSchemeNames.Where(u => u == "mailto").Select(u => $"{u}:")
-				)
-				.ToImmutableHashSet();
-
-		public static string UriDoubleSlashedSuffix => "://";
 
 		public static string DesuffixUriScheme(string suffixedScheme)
 		{
-			var lastIndexOf = suffixedScheme.LastIndexOf(UriDoubleSlashedSuffix, StringComparison.CurrentCultureIgnoreCase);
-			return suffixedScheme.Substring(0, lastIndexOf);
+			var splitOnColonIndex = suffixedScheme.LastIndexOf(":", StringComparison.CurrentCultureIgnoreCase);
+			return suffixedScheme[..splitOnColonIndex];
 		}
 	}
 }

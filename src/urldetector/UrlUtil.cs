@@ -32,7 +32,7 @@ namespace urldetector
 					{
 						var startIndex = i + 1;
 						var endIndex = i + 3;
-						var decodedChar = (char) Convert.ToInt16(stringBuilder.ToString().Substring(startIndex, endIndex-startIndex), 16);
+						var decodedChar = (char) Convert.ToInt16(stringBuilder.ToString(startIndex, endIndex-startIndex), 16);
 
 						stringBuilder.Remove(i, endIndex - i); //delete the % and two hex digits
 						stringBuilder.Insert(i, decodedChar); //add decoded character
@@ -68,7 +68,7 @@ namespace urldetector
 
 		/// <summary>
 		/// Removes TAB (0x09), CR (0x0d), and LF (0x0a) from the URL
-		/// @param urlPart The part of the url we are canonicalizing
+		/// @param urlPart The part of the url we are making canonical
 		/// </summary>
 		/// <param name="urlPart"></param>
 		/// <returns></returns>
@@ -95,20 +95,22 @@ namespace urldetector
 		/// <returns></returns>
 		public static string Encode(string url)
 		{
-			var encoder = new StringBuilder();
-			foreach (var chr in url.ToCharArray())
-			{
-				var chrByte = (byte) chr;
-				if (chrByte <= 32 || chrByte >= 127 || chr == '#' || chr == '%')
-				{
-					encoder.Append("%" + BitConverter.ToString(new[] {chrByte}));	// Dale equivalent
-				}
-				else
-				{
-					encoder.Append(chr);
-				}
-			}
-			return encoder.ToString();
+            var encoder = new StringBuilder(url.Length);
+            for (int i = 0; i < url.Length; i++)
+            {
+                char chr = url[i];
+                byte b = (byte)chr;
+                if (b <= 32 || b >= 127 || chr == '#' || chr == '%')
+                {
+                    // %XX
+                    encoder.Append('%').Append(BitConverter.ToString([b]));
+                }
+                else
+                {
+                    encoder.Append(chr);
+                }
+            }
+            return encoder.ToString();
 		}
 
 
@@ -141,7 +143,7 @@ namespace urldetector
 				}
 			}
 
-			if (stringBuilder.Length > 0 && stringBuilder[stringBuilder.Length - 1] == '.')
+			if (stringBuilder.Length > 0 && stringBuilder[^1] == '.')
 			{
 				stringBuilder.Remove(stringBuilder.Length - 1, 1);
 			}
