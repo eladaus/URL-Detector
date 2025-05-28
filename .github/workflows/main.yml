@@ -9,6 +9,10 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    
+    env:
+      PROJECT_PATH: './src/urldetector'   # adjust to the folder that contains your .csproj
+      
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -16,30 +20,35 @@ jobs:
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '7.0.x'
+          dotnet-version: '9.0.x'
 
       - name: Cache NuGet packages
         uses: actions/cache@v3
         with:
           path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          key: ${{ runner.os }}-nuget-${{ hashFiles(env.PROJECT_PATH + '/**/*.csproj') }}
           restore-keys: |
             ${{ runner.os }}-nuget-
 
       - name: Restore dependencies
+        working-directory: ${{ env.PROJECT_PATH }}
         run: dotnet restore
 
       - name: Build in Release
+        working-directory: ${{ env.PROJECT_PATH }}
         run: dotnet build --configuration Release --no-restore
 
       - name: Run tests
+        working-directory: ${{ env.PROJECT_PATH }}
         run: dotnet test --configuration Release --no-build --verbosity normal
 
       - name: Pack NuGet package
-        run: dotnet pack --configuration Release --no-build --output ./nupkg
+        working-directory: ${{ env.PROJECT_PATH }}
+        run: dotnet pack --configuration Release --no-build --output nupkg
 
       - name: Push package to nuget.org
+        working-directory: ${{ env.PROJECT_PATH }}
         run: |
-          dotnet nuget push ./nupkg/*.nupkg \
+          dotnet nuget push nupkg/*.nupkg \
             --api-key ${{ secrets.NUGET_API_KEY }} \
             --source https://api.nuget.org/v3/index.json
