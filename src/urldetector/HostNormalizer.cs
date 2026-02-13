@@ -75,6 +75,27 @@ namespace urldetector
 						else
 						{
 							host = ipAddressFromBytes.ToString();
+
+							// .NET formats IPv4-compatible IPv6 addresses (first 96 bits = 0)
+							// in mixed notation (e.g. "::192.167.2.2") whereas Java uses pure
+							// hex notation (e.g. "::c0a7:202"). Convert to hex to match Java.
+							if (host.Contains('.'))
+							{
+								var lastColonIdx = host.LastIndexOf(':');
+								var ipv4Part = host[(lastColonIdx + 1)..];
+								var prefix = host[..(lastColonIdx + 1)];
+								var octets = ipv4Part.Split('.');
+								if (octets.Length == 4)
+								{
+									int o0 = int.Parse(octets[0]);
+									int o1 = int.Parse(octets[1]);
+									int o2 = int.Parse(octets[2]);
+									int o3 = int.Parse(octets[3]);
+									host = prefix + ((o0 << 8) | o1).ToString("x")
+										+ ":" + ((o2 << 8) | o3).ToString("x");
+								}
+							}
+
 							host = "[" + host + "]";
 						}
 					}

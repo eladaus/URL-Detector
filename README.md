@@ -12,9 +12,7 @@ Install-Package eladaus.urldetector
 
 ## Known Issues
 
-Currently, 3 test cases fail out of the original suite of over 350. This appears to be a difference between how Java and C# represent signed ints/bytes, however fixing this is currently low priority/backlogged.   
-
-That said, anyone who needs this fixed will be able to compare the C# port with the Java original to debug, and we welcome any contributions and pull-requests.
+None
 
 ## Description
 
@@ -56,10 +54,11 @@ For example, the following code will find the url `linkedin.com`
     UrlDetector parser = new UrlDetector("hello this is a url Linkedin.com", UrlDetectorOptions.Default);
     List<Url> found = parser.Detect();
 
-    foreach(Url url in found) {
-        Console.WriteLine("Scheme: " + url.getScheme());
-        Console.WriteLine("Host: " + url.getHost());
-        Console.WriteLine("Path: " + url.getPath());
+    foreach (Url url in found)
+    {
+        Console.WriteLine("Scheme: " + url.GetScheme());
+        Console.WriteLine("Host: " + url.GetHost());
+        Console.WriteLine("Path: " + url.GetPath());
     }
 ```
 
