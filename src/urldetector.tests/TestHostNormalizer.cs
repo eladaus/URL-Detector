@@ -68,7 +68,7 @@ namespace urldetector.tests
 		public void TestSanityAddresses(string host)
 		{
 			HostNormalizer hostNormalizer = new HostNormalizer(host);
-			Assert.Equal(hostNormalizer.GetNormalizedHost(), host.ToLower());
+			Assert.Equal(host.ToLower(), hostNormalizer.GetNormalizedHost());
 			Assert.Null(hostNormalizer.GetBytes());
 		}
 	}

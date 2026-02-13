@@ -78,8 +78,8 @@ namespace urldetector.tests
 		{
 			Url url = NormalizedUrl.Create(testString);
 			Assert.NotNull(url);
-			Assert.Equal(url.GetHost(), host);
-			Assert.Equal(url.GetPath(), path);
+			Assert.Equal(host, url.GetHost());
+			Assert.Equal(path, url.GetPath());
 		}
 
 

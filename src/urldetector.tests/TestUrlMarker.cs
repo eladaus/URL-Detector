@@ -110,14 +110,14 @@ namespace urldetector.tests
 			urlMarker.SetOriginalUrl(testString);
 			urlMarker.SetIndices(indices);
 			var url = urlMarker.CreateUrl();
-			Assert.Equal(url.GetHost(), host /*, "host, " + testString*/);
-			Assert.Equal(url.GetPath(), path /*, "path, " + testString*/);
-			Assert.Equal(url.GetScheme(), scheme /*, "scheme, " + testString*/);
-			Assert.Equal(url.GetUsername(), username /*, "username, " + testString*/);
-			Assert.Equal(url.GetPassword(), password /*, "password, " + testString*/);
-			Assert.Equal(url.GetPort(), port /*, "port, " + testString*/);
-			Assert.Equal(url.GetQuery(), query /*, "query, " + testString*/);
-			Assert.Equal(url.GetFragment(), fragment /*, "fragment, " + testString*/);
+			Assert.Equal(host, url.GetHost());
+			Assert.Equal(path, url.GetPath());
+			Assert.Equal(scheme, url.GetScheme());
+			Assert.Equal(username, url.GetUsername());
+			Assert.Equal(password, url.GetPassword());
+			Assert.Equal(port, url.GetPort());
+			Assert.Equal(query, url.GetQuery());
+			Assert.Equal(fragment, url.GetFragment());
 		}
 	}
 }

@@ -60,7 +60,7 @@ namespace urldetector.tests
 		{
 			var pathNormalizer = new PathNormalizer();
 
-			Assert.Equal(pathNormalizer.NormalizePath(path), expectedPath);
+			Assert.Equal(expectedPath, pathNormalizer.NormalizePath(path));
 		}
 	}
 }

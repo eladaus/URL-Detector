@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Xunit;
 
 namespace urldetector.tests
@@ -94,10 +94,10 @@ namespace urldetector.tests
 		public void TestUsernamePasswordUrls(string testInput, string host, string path, string username, string password)
 		{
 			var url = Url.Create(testInput);
-			Assert.Equal(url.GetHost(), host);
-			Assert.Equal(url.GetPath(), path);
-			Assert.Equal(url.GetUsername(), username);
-			Assert.Equal(url.GetPassword(), password);
+			Assert.Equal(host, url.GetHost());
+			Assert.Equal(path, url.GetPath());
+			Assert.Equal(username, url.GetUsername());
+			Assert.Equal(password, url.GetPassword());
 		}
 
 
@@ -106,9 +106,9 @@ namespace urldetector.tests
 		public void TestPort(string testInput, string host, string path, int port)
 		{
 			var url = Url.Create(testInput);
-			Assert.Equal(url.GetHost(), host);
-			Assert.Equal(url.GetPath(), path);
-			Assert.Equal(url.GetPort(), port);
+			Assert.Equal(host, url.GetHost());
+			Assert.Equal(path, url.GetPath());
+			Assert.Equal(port, url.GetPort());
 		}
 
 
@@ -117,9 +117,9 @@ namespace urldetector.tests
 		public void TestQuery(string testInput, string host, string path, string query)
 		{
 			var url = Url.Create(testInput);
-			Assert.Equal(url.GetHost(), host);
-			Assert.Equal(url.GetPath(), path);
-			Assert.Equal(url.GetQuery(), query);
+			Assert.Equal(host, url.GetHost());
+			Assert.Equal(path, url.GetPath());
+			Assert.Equal(query, url.GetQuery());
 		}
 
 
@@ -128,22 +128,23 @@ namespace urldetector.tests
 		public void TestScheme(string testInput, string scheme, string host, string path)
 		{
 			var url = Url.Create(testInput);
-			Assert.Equal(url.GetScheme(), scheme);
-			Assert.Equal(url.GetHost(), host);
-			Assert.Equal(url.GetPath(), path);
+			Assert.Equal(scheme, url.GetScheme());
+			Assert.Equal(host, url.GetHost());
+			Assert.Equal(path, url.GetPath());
 		}
 
 
 		[Theory]
 		[MemberData(nameof(GetUrlsAndHosts))]
-		public void TestHostAndFullUrl(string testInput, string host, string fullUrl) 
+		public void TestHostAndFullUrl(string testInput, string host, string fullUrl)
 		{
 			var url = Url.Create(testInput);
-			Assert.Equal(url.GetHost(), host /*, testInput*/);
-			Assert.Equal(url.GetFullUrl(), fullUrl);
+			Assert.Equal(host, url.GetHost());
+			Assert.Equal(fullUrl, url.GetFullUrl());
 			var fragmentIndex = fullUrl.IndexOf("#");
-			Assert.Equal(url.GetFullUrlWithoutFragment(),
-				fragmentIndex == -1 ? fullUrl : fullUrl.Substring(0, fragmentIndex));
+			Assert.Equal(
+				fragmentIndex == -1 ? fullUrl : fullUrl.Substring(0, fragmentIndex),
+				url.GetFullUrlWithoutFragment());
 		}
 
 
@@ -152,9 +153,9 @@ namespace urldetector.tests
 		public void TestSingleDomainUrls(string testInput, string host, int port, string fullUrl)
 		{
 			var url = Url.Create(testInput);
-			Assert.Equal(url.GetHost(), host);
-			Assert.Equal(url.GetPort(), port);
-			Assert.Equal(url.GetFullUrl(), fullUrl);
+			Assert.Equal(host, url.GetHost());
+			Assert.Equal(port, url.GetPort());
+			Assert.Equal(fullUrl, url.GetFullUrl());
 		}
 	}
 }

@@ -31,8 +31,7 @@ namespace urldetector.tests.detection
 		{
 			var regex = "[\\.\u3002\uFF0E\uFF61]|%2e|%2E";
 			var expected = Regex.Split(stringToSplit, regex);
-			Assert
-				.Equal(CharUtils.SplitByDot(stringToSplit), expected);
+			Assert.Equal(expected, CharUtils.SplitByDot(stringToSplit));
 		}
 
 		[Fact]

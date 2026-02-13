@@ -57,21 +57,21 @@ namespace urldetector.tests
 		[MemberData(nameof(GetDecodeStrings))]
 		public void TestDecode(string input, string expectedDecodedString)
 		{
-			Assert.Equal(UrlUtil.Decode(input), expectedDecodedString);
+			Assert.Equal(expectedDecodedString, UrlUtil.Decode(input));
 		}
 
 		[Theory] 
 		[MemberData(nameof(GetEncodeStrings))]
 		public void TestEncode(string input, string expectedEncodedString)
 		{
-			Assert.Equal(UrlUtil.Encode(input), expectedEncodedString);
+			Assert.Equal(expectedEncodedString, UrlUtil.Encode(input));
 		}
 
 		[Theory] 
 		[MemberData(nameof(GetExtraDotsStrings))]
 		public void TestExtraDotsHosts(string input, string expected)
 		{
-			Assert.Equal(UrlUtil.RemoveExtraDots(input), expected);
+			Assert.Equal(expected, UrlUtil.RemoveExtraDots(input));
 		}
 	}
 }
