@@ -103,6 +103,44 @@ dotnet csharpier format src/
 For more information, see the [CSharpier GitHub repository](https://github.com/belav/csharpier).
 
 ---
+## Benchmarks
+
+The project includes a [BenchmarkDotNet](https://benchmarkdotnet.org/) suite that measures CPU and memory usage across different input sizes, URL densities, URL types, detector options, and structured content formats.
+
+Benchmarks must be run in **Release** mode. From the repository root:
+
+```bash
+dotnet run -c Release --project src/urldetector.benchmarks
+```
+
+You will be prompted to select a benchmark class to run. To run a specific suite directly, pass a `--filter`:
+
+```bash
+# Run only the input-size scaling benchmarks
+dotnet run -c Release --project src/urldetector.benchmarks -- --filter '*InputSizeBenchmarks*'
+
+# Run only the URL density benchmarks
+dotnet run -c Release --project src/urldetector.benchmarks -- --filter '*UrlDensityBenchmarks*'
+
+# Run all benchmarks (no filter prompt)
+dotnet run -c Release --project src/urldetector.benchmarks -- --filter '*'
+```
+
+Available benchmark suites:
+
+| Suite | What it measures |
+|---|---|
+| `InputSizeBenchmarks` | Scaling from 200 B to 5 MB inputs |
+| `UrlDensityBenchmarks` | Impact of URL density (0%–90%) on 50 KB input |
+| `UrlTypeBenchmarks` | Cost per URL type (web, email, IPv4, IPv6, mixed) |
+| `DetectorOptionsBenchmarks` | Overhead of each `UrlDetectorOptions` mode |
+| `StructuredContentBenchmarks` | Matching options against HTML/JSON/XML/JS content |
+| `RealWorldHtmlBenchmarks` | Real HTML sample files with default vs. all flags |
+| `TestCpuAndMemoryUsage` | Legacy suite — real HTML files with all flags enabled |
+
+Results are written to `src/urldetector.benchmarks/BenchmarkDotNet.Artifacts/`.
+
+---
 ## About:
 
 This C# port was originally created by Dale Holborow of eladaus oy. Future contributions are welcome.
