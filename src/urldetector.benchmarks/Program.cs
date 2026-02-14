@@ -15,35 +15,37 @@ using Perfolizer.Metrology;
 
 namespace urldetector.benchmarks
 {
-	class Program
-	{
-		static void Main(string[] args)
-		{
-			Console.WriteLine("Hello BenchMarker!");
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Hello BenchMarker!");
 
-			RunBenchmarks(args);
-		}
+            RunBenchmarks(args);
+        }
 
+        static void RunBenchmarks(string[] args)
+        {
+            var configuration = new ManualConfig()
+            {
+                SummaryStyle = new SummaryStyle(
+                    CultureInfo.CurrentCulture,
+                    printUnitsInHeader: true,
+                    sizeUnit: SizeUnit.KB,
+                    timeUnit: TimeUnit.Millisecond,
+                    printUnitsInContent: true,
+                    printZeroValuesInContent: true
+                ),
+            };
 
-		static void RunBenchmarks(string[] args)
-		{
-			var configuration = new ManualConfig()
-			{
-				SummaryStyle = new SummaryStyle(
-                    CultureInfo.CurrentCulture, 
-					printUnitsInHeader: true,
-					sizeUnit: SizeUnit.KB,
-					timeUnit: TimeUnit.Millisecond,
-					printUnitsInContent: true,
-					printZeroValuesInContent: true)
-			};
+            configuration.AddExporter(DefaultConfig.Instance.GetExporters().ToArray());
+            configuration.AddLogger(DefaultConfig.Instance.GetLoggers().ToArray());
+            configuration.AddColumnProvider(DefaultConfig.Instance.GetColumnProviders().ToArray());
 
-			configuration.AddExporter(DefaultConfig.Instance.GetExporters().ToArray());
-			configuration.AddLogger(DefaultConfig.Instance.GetLoggers().ToArray());
-			configuration.AddColumnProvider(DefaultConfig.Instance.GetColumnProviders().ToArray());
-
-			// Run the benchmarks
-			var summary = BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args, configuration);
-		}
-	}
+            // Run the benchmarks
+            var summary = BenchmarkSwitcher
+                .FromAssembly(typeof(Program).Assembly)
+                .Run(args, configuration);
+        }
+    }
 }

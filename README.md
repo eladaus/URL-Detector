@@ -83,6 +83,26 @@ In code this looks like:
 
 
 ---
+## Developer Setup
+
+After cloning the repository, restore the local dotnet tools and install the Husky git hooks:
+
+```bash
+dotnet tool restore
+dotnet husky install
+```
+
+This installs [CSharpier](https://csharpier.com/) and [Husky.Net](https://alirezanet.github.io/Husky.Net/) as local tools, and sets up a pre-commit hook that automatically formats staged `.cs` files with CSharpier before each commit.
+
+To manually run CSharpier across the entire solution:
+
+```bash
+dotnet csharpier format src/
+```
+
+For more information, see the [CSharpier GitHub repository](https://github.com/belav/csharpier).
+
+---
 ## About:
 
 This C# port was originally created by Dale Holborow of eladaus oy. Future contributions are welcome.

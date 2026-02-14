@@ -2,22 +2,21 @@
 
 namespace urldetector.eladaus
 {
-	public static class OctalEncodingHelper
-	{
-		public static bool LooksLikeOctal(ReadOnlySpan<char> chars)
-		{
-			foreach (var c in chars)
-			{
-				var isOctal = c >= '0' && c <= '7';
+    public static class OctalEncodingHelper
+    {
+        public static bool LooksLikeOctal(ReadOnlySpan<char> chars)
+        {
+            foreach (var c in chars)
+            {
+                var isOctal = c >= '0' && c <= '7';
 
-				if (!isOctal)
-				{
-					return false;
-				}
-			}
-			return true;
-		}
-
+                if (!isOctal)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
 
         /// <summary>
         /// Try to parse an octal number as a LONG from a span of characters.
@@ -45,7 +44,6 @@ namespace urldetector.eladaus
             return true;
         }
 
-
         /// <summary>
         /// Try to parse an octal number as an INT from a span of characters
         /// </summary>
@@ -63,7 +61,7 @@ namespace urldetector.eladaus
             foreach (char c in chars)
             {
                 int digit = c - '0';
-                if ((uint)digit > 7)       // not 0–7
+                if ((uint)digit > 7) // not 0–7
                 {
                     result = 0;
                     return false;
@@ -84,5 +82,4 @@ namespace urldetector.eladaus
             return true;
         }
     }
-
 }
