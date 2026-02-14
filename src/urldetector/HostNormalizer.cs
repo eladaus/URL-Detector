@@ -290,10 +290,7 @@ namespace urldetector
             //Check for embedded ipv4 address
             //string lastPart = parts.get(parts.size() - 1);
             var lastPart = parts.Last();
-            var zoneIndexStart = lastPart.LastIndexOf(
-                "%",
-                StringComparison.CurrentCultureIgnoreCase
-            );
+            var zoneIndexStart = lastPart.LastIndexOf('%');
             var lastPartWithoutZoneIndex =
                 zoneIndexStart == -1 ? lastPart : lastPart[..zoneIndexStart];
             byte[] ipv4Address = null;
@@ -317,8 +314,9 @@ namespace urldetector
                     numberOfFilledZeroes = totalSize - size;
                     for (int k = i; k < numberOfFilledZeroes + i; k++)
                     {
-                        // C# guess
-                        Array.ConstrainedCopy(SectionToTwoBytes(0), 0, bytes, k * 2, 2);
+                        int offset = k * 2;
+                        bytes[offset] = 0;
+                        bytes[offset + 1] = 0;
                     }
                 }
                 int section;
@@ -343,13 +341,9 @@ namespace urldetector
                 {
                     return null;
                 }
-                Array.ConstrainedCopy(
-                    SectionToTwoBytes(section),
-                    0,
-                    bytes,
-                    (numberOfFilledZeroes + i) * 2,
-                    2
-                );
+                int byteOffset = (numberOfFilledZeroes + i) * 2;
+                bytes[byteOffset] = (byte)((section >> 8) & 0xff);
+                bytes[byteOffset + 1] = (byte)(section & 0xff);
             }
 
             if (ipv4Address != null)
@@ -376,14 +370,6 @@ namespace urldetector
             }
 
             return true;
-        }
-
-        private static byte[] SectionToTwoBytes(int section)
-        {
-            var bytes = new byte[2];
-            bytes[0] = (byte)((section >> 8) & 0xff);
-            bytes[1] = (byte)(section & 0xff);
-            return bytes;
         }
 
         public byte[] GetBytes()

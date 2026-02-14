@@ -81,7 +81,7 @@ namespace urldetector.detection
         /// <returns></returns>
         public static string[] SplitByDot(string input)
         {
-            var splitList = new List<string>();
+            var splitList = new List<string>(4);
             var section = new StringBuilder();
             if (string.IsNullOrEmpty(input))
             {
@@ -100,7 +100,7 @@ namespace urldetector.detection
                 else if (
                     curr == '%'
                     && reader.CanReadChars(2)
-                    && reader.Peek(2).Equals("2e", StringComparison.OrdinalIgnoreCase)
+                    && reader.PeekSpan(2).Equals("2e", StringComparison.OrdinalIgnoreCase)
                 )
                 {
                     reader.Read();

@@ -365,10 +365,7 @@ namespace urldetector.eladaus
 
         public static string DesuffixUriScheme(string suffixedScheme)
         {
-            var splitOnColonIndex = suffixedScheme.LastIndexOf(
-                ":",
-                StringComparison.CurrentCultureIgnoreCase
-            );
+            var splitOnColonIndex = suffixedScheme.LastIndexOf(':');
             return suffixedScheme[..splitOnColonIndex];
         }
     }

@@ -54,6 +54,17 @@ namespace urldetector.detection
         }
 
         /// <summary>
+        /// Peeks at the next number of chars and returns as a ReadOnlySpan without allocating, and without incrementing the current index.
+        /// @param numberChars The number of chars to peek.
+        /// </summary>
+        /// <param name="numberChars"></param>
+        /// <returns></returns>
+        public ReadOnlySpan<char> PeekSpan(int numberChars)
+        {
+            return _content.AsSpan(_index, numberChars);
+        }
+
+        /// <summary>
         /// Gets the character in the array offset by the current index.
         /// @param offset The number of characters to offset.
         /// @return The character at the location of the index plus the provided offset.

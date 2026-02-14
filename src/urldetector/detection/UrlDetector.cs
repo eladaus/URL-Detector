@@ -227,8 +227,8 @@ namespace urldetector.detection
                         {
                             if (
                                 _reader
-                                    .Peek(2)
-                                    .Equals("3a", StringComparison.InvariantCultureIgnoreCase)
+                                    .PeekSpan(2)
+                                    .Equals("3a", StringComparison.OrdinalIgnoreCase)
                             )
                             {
                                 _buffer.Append(curr);
@@ -295,7 +295,7 @@ namespace urldetector.detection
                         //if it doesn't have a scheme, clear the buffer.
                         if (!_hasScheme)
                         {
-                            _buffer.Remove(0, _buffer.Length);
+                            _buffer.Clear();
                         }
 
                         _buffer.Append(curr);
@@ -455,7 +455,7 @@ namespace urldetector.detection
         /// </summary>
         private int GetCharacterCount(char curr)
         {
-            return (_characterMatch.ContainsKey(curr)) ? _characterMatch[curr] : 0;
+            return _characterMatch.TryGetValue(curr, out var count) ? count : 0;
         }
 
         /// <summary>
@@ -972,7 +972,7 @@ namespace urldetector.detection
             }
 
             //clear out the buffer.
-            _buffer.Remove(0, _buffer.Length);
+            _buffer.Clear();
 
             //reset the state of internal objects.
             _quoteStart = false;

@@ -375,11 +375,8 @@ namespace urldetector.detection
                 (_current == null || _current.Equals(""))
                 && _reader.CanReadChars(3)
                 && _reader
-                    .Peek(2)
-                    .Equals( // ReadOnlySpan<char>
-                        "0x", // implicitly converted to ReadOnlySpan<char>
-                        StringComparison.InvariantCultureIgnoreCase
-                    );
+                    .PeekSpan(2)
+                    .Equals("0x", StringComparison.OrdinalIgnoreCase);
 
             if (isAllHexSoFar)
             {
@@ -431,7 +428,7 @@ namespace urldetector.detection
                     || curr == '%'
                         && _reader.CanReadChars(2)
                         && _reader
-                            .Peek(2)
+                            .PeekSpan(2)
                             .Equals(HEX_ENCODED_DOT, StringComparison.OrdinalIgnoreCase)
                 )
                 {
@@ -641,7 +638,7 @@ namespace urldetector.detection
 
                 //There is no size restriction if the top level domain is international (starts with "xn--")
                 valid =
-                    topLevelStart.Equals("xn--", StringComparison.InvariantCultureIgnoreCase)
+                    topLevelStart.Equals("xn--", StringComparison.OrdinalIgnoreCase)
                     || _topLevelLength >= MIN_TOP_LEVEL_DOMAIN
                         && _topLevelLength <= MAX_TOP_LEVEL_DOMAIN;
             }
@@ -918,7 +915,7 @@ namespace urldetector.detection
                         hexSection = true; //reset hex to true
                         hexDigits = 0; //reset count for hex digits
                         numSections++;
-                        lastSection.Remove(0, lastSection.Length); //clear last section
+                        lastSection.Clear(); //clear last section
                         break;
                     default:
                         if (zoneIndiceMode)
