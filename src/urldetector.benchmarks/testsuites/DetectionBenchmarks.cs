@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Jobs;
 using urldetector.benchmarks.Data;
 using urldetector.detection;
 using urldetector.tests.custom;
@@ -10,6 +11,8 @@ namespace urldetector.benchmarks.testsuites
     /// Measures how detection scales with input size, from tiny 200-byte strings up to 5 MB bodies.
     /// All inputs use the <see cref="UrlMixProfile.Mixed"/> profile with <see cref="UrlDetectorOptions.Default"/>.
     /// </summary>
+    [SimpleJob(RuntimeMoniker.Net80)]
+    [SimpleJob(RuntimeMoniker.Net10_0)]
     [MemoryDiagnoser]
     public class InputSizeBenchmarks
     {
@@ -60,6 +63,8 @@ namespace urldetector.benchmarks.testsuites
     /// Measures the impact of URL density on a fixed ~50 KB input.
     /// Densities range from 0% (pure filler) to 90% (almost entirely URLs).
     /// </summary>
+    [SimpleJob(RuntimeMoniker.Net80)]
+    [SimpleJob(RuntimeMoniker.Net10_0)]
     [MemoryDiagnoser]
     public class UrlDensityBenchmarks
     {
@@ -109,6 +114,8 @@ namespace urldetector.benchmarks.testsuites
     /// Measures detection cost per URL type on a fixed ~50 KB input at 20% density.
     /// Isolates web, email, IPv4, IPv6, and mixed URL profiles against a plain-text baseline.
     /// </summary>
+    [SimpleJob(RuntimeMoniker.Net80)]
+    [SimpleJob(RuntimeMoniker.Net10_0)]
     [MemoryDiagnoser]
     public class UrlTypeBenchmarks
     {
@@ -176,6 +183,8 @@ namespace urldetector.benchmarks.testsuites
     /// Measures the cost of each <see cref="UrlDetectorOptions"/> mode on the same ~50 KB mixed input.
     /// Provides a direct comparison of option overhead independent of content format.
     /// </summary>
+    [SimpleJob(RuntimeMoniker.Net80)]
+    [SimpleJob(RuntimeMoniker.Net10_0)]
     [MemoryDiagnoser]
     public class DetectorOptionsBenchmarks
     {
@@ -233,6 +242,8 @@ namespace urldetector.benchmarks.testsuites
     /// Each content type is tested with both <see cref="UrlDetectorOptions.Default"/> and its matching
     /// option to measure the overhead or benefit of using the correct mode.
     /// </summary>
+    [SimpleJob(RuntimeMoniker.Net80)]
+    [SimpleJob(RuntimeMoniker.Net10_0)]
     [MemoryDiagnoser]
     public class StructuredContentBenchmarks
     {
@@ -348,6 +359,8 @@ namespace urldetector.benchmarks.testsuites
     /// Tests real HTML sample files (tiny through large) with <see cref="UrlDetectorOptions.Default"/>
     /// versus all flags enabled, measuring the overhead of enabling every option on actual web pages.
     /// </summary>
+    [SimpleJob(RuntimeMoniker.Net80)]
+    [SimpleJob(RuntimeMoniker.Net10_0)]
     [MemoryDiagnoser]
     public class RealWorldHtmlBenchmarks
     {

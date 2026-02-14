@@ -1,9 +1,12 @@
 ﻿using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Jobs;
 using urldetector.detection;
 using urldetector.tests.custom;
 
 namespace urldetector.benchmarks.testsuites
 {
+    [SimpleJob(RuntimeMoniker.Net80)]
+    [SimpleJob(RuntimeMoniker.Net10_0)]
     [MemoryDiagnoser]
     public class TestCpuAndMemoryUsage
     {
