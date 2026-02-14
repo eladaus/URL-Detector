@@ -1,12 +1,11 @@
 ﻿using System.Collections.Generic;
 
-namespace urldetector.eladaus
+namespace urldetector.eladaus;
+
+public static class StackExtensions
 {
-    public static class StackExtensions
+    public static bool IsEmpty<T>(this Stack<T> stack)
     {
-        public static bool IsEmpty<T>(this Stack<T> stack)
-        {
-            return stack.Count == 0;
-        }
+        return stack.Count == 0;
     }
 }

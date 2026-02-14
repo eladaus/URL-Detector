@@ -7,379 +7,342 @@ using System.Net.Sockets;
 using urldetector.detection;
 using urldetector.eladaus;
 
-namespace urldetector
+namespace urldetector;
+
+/// <summary>
+/// Normalizes the host by converting hex characters to the actual textual representation, changes ip addresses
+/// to a formal format. Then re-encodes the readonly host name.
+/// </summary>
+public class HostNormalizer
 {
-    /// <summary>
-    /// Normalizes the host by converting hex characters to the actual textual representation, changes ip addresses
-    /// to a formal format. Then re-encodes the readonly host name.
-    /// </summary>
-    public class HostNormalizer
+    private static readonly long MAX_NUMERIC_DOMAIN_VALUE = 4294967295L;
+    private static readonly int MAX_IPV4_PART = 255;
+    private static readonly int MIN_IP_PART = 0;
+    private static readonly int MAX_IPV6_PART = 0xFFFF;
+    private static readonly int IPV4_MAPPED_IPV6_START_OFFSET = 12;
+    private static readonly int NUMBER_BYTES_IN_IPV4 = 4;
+
+    public byte[] Bytes { get; private set; }
+    private readonly string _host;
+    private string _normalizedHost;
+
+    public HostNormalizer(string host)
     {
-        private static readonly long MAX_NUMERIC_DOMAIN_VALUE = 4294967295L;
-        private static readonly int MAX_IPV4_PART = 255;
-        private static readonly int MIN_IP_PART = 0;
-        private static readonly int MAX_IPV6_PART = 0xFFFF;
-        private static readonly int IPV4_MAPPED_IPV6_START_OFFSET = 12;
-        private static readonly int NUMBER_BYTES_IN_IPV4 = 4;
+        _host = host;
+        Bytes = null;
 
-        public byte[] Bytes { get; private set; }
-        private readonly string _host;
-        private string _normalizedHost;
+        NormalizeHost();
+    }
 
-        public HostNormalizer(string host)
+    private void NormalizeHost()
+    {
+        if (string.IsNullOrEmpty(_host))
+            return;
+
+        string host;
+        try
         {
-            _host = host;
-            Bytes = null;
-
-            NormalizeHost();
+            host = AsciiTextEncodingExtensions.EncodeNonAsciiCharacters(_host);
+        }
+        catch (Exception)
+        {
+            //occurs when the url is invalid. Just return
+            return;
         }
 
-        private void NormalizeHost()
-        {
-            if (string.IsNullOrEmpty(_host))
-            {
-                return;
-            }
+        host = host.ToLowerInvariant();
+        host = UrlUtil.Decode(host);
 
-            string host;
+        Bytes = TryDecodeHostToIp(host);
+
+        if (Bytes != null)
             try
             {
-                host = AsciiTextEncodingExtensions.EncodeNonAsciiCharacters(_host);
-            }
-            catch (Exception)
-            {
-                //occurs when the url is invalid. Just return
-                return;
-            }
+                var ipAddressFromBytes = new IPAddress(Bytes);
 
-            host = host.ToLowerInvariant();
-            host = UrlUtil.Decode(host);
-
-            Bytes = TryDecodeHostToIp(host);
-
-            if (Bytes != null)
-            {
-                try
+                if (ipAddressFromBytes.AddressFamily == AddressFamily.InterNetworkV6)
                 {
-                    var ipAddressFromBytes = new IPAddress(Bytes);
-
-                    if (ipAddressFromBytes.AddressFamily == AddressFamily.InterNetworkV6)
+                    if (ipAddressFromBytes.IsIPv4MappedToIPv6)
                     {
-                        if (ipAddressFromBytes.IsIPv4MappedToIPv6)
-                        {
-                            host = ipAddressFromBytes.MapToIPv4().ToString();
-                        }
-                        else
-                        {
-                            host = ipAddressFromBytes.ToString();
-
-                            // .NET formats IPv4-compatible IPv6 addresses (first 96 bits = 0)
-                            // in mixed notation (e.g. "::192.167.2.2") whereas Java uses pure
-                            // hex notation (e.g. "::c0a7:202"). Convert to hex to match Java.
-                            if (host.Contains('.'))
-                            {
-                                var lastColonIdx = host.LastIndexOf(':');
-                                var ipv4Part = host[(lastColonIdx + 1)..];
-                                var prefix = host[..(lastColonIdx + 1)];
-                                var octets = ipv4Part.Split('.');
-                                if (octets.Length == 4)
-                                {
-                                    int o0 = int.Parse(octets[0]);
-                                    int o1 = int.Parse(octets[1]);
-                                    int o2 = int.Parse(octets[2]);
-                                    int o3 = int.Parse(octets[3]);
-                                    host =
-                                        prefix
-                                        + ((o0 << 8) | o1).ToString("x")
-                                        + ":"
-                                        + ((o2 << 8) | o3).ToString("x");
-                                }
-                            }
-
-                            host = "[" + host + "]";
-                        }
+                        host = ipAddressFromBytes.MapToIPv4().ToString();
                     }
                     else
                     {
                         host = ipAddressFromBytes.ToString();
+
+                        // .NET formats IPv4-compatible IPv6 addresses (first 96 bits = 0)
+                        // in mixed notation (e.g. "::192.167.2.2") whereas Java uses pure
+                        // hex notation (e.g. "::c0a7:202"). Convert to hex to match Java.
+                        if (host.Contains('.'))
+                        {
+                            var lastColonIdx = host.LastIndexOf(':');
+                            var ipv4Part = host[(lastColonIdx + 1)..];
+                            var prefix = host[..(lastColonIdx + 1)];
+                            var octets = ipv4Part.Split('.');
+                            if (octets.Length == 4)
+                            {
+                                var o0 = int.Parse(octets[0]);
+                                var o1 = int.Parse(octets[1]);
+                                var o2 = int.Parse(octets[2]);
+                                var o3 = int.Parse(octets[3]);
+                                host =
+                                    prefix
+                                    + ((o0 << 8) | o1).ToString("x")
+                                    + ":"
+                                    + ((o2 << 8) | o3).ToString("x");
+                            }
+                        }
+
+                        host = "[" + host + "]";
                     }
                 }
-                catch (Exception)
+                else
                 {
-                    return;
+                    host = ipAddressFromBytes.ToString();
                 }
             }
-
-            if (string.IsNullOrEmpty(host))
+            catch (Exception)
             {
                 return;
             }
 
-            host = UrlUtil.RemoveExtraDots(host);
+        if (string.IsNullOrEmpty(host))
+            return;
 
-            _normalizedHost = UrlUtil.Encode(host).Replace("\\x", "%");
-        }
+        host = UrlUtil.RemoveExtraDots(host);
 
-        /// <summary>
-        /// Checks if the host is an ip address. Returns the byte representation of it
-        /// </summary>
-        /// <param name="host"></param>
-        /// <returns></returns>
-        private static byte[] TryDecodeHostToIp(string host)
+        _normalizedHost = UrlUtil.Encode(host).Replace("\\x", "%");
+    }
+
+    /// <summary>
+    /// Checks if the host is an ip address. Returns the byte representation of it
+    /// </summary>
+    /// <param name="host"></param>
+    /// <returns></returns>
+    private static byte[] TryDecodeHostToIp(string host)
+    {
+        // null/empty check if needed:
+        if (host is null || host.Length < 3)
+            return null;
+
+        if (host[0] == '[' && host[^1] == ']')
+            return TryDecodeHostToIPv6(host);
+
+        return TryDecodeHostToIPv4(host);
+    }
+
+    /// <summary>
+    /// This covers cases like:
+    /// Hexadecimal:        0x1283983
+    /// Decimal:            12839273
+    /// Octal:              037362273110
+    /// Dotted Decimal:     192.168.1.1
+    /// Dotted Hexadecimal: 0xfe.0x83.0x18.0x1
+    /// Dotted Octal:       0301.00.046.00
+    /// Dotted Mixed:       0x38.168.077.1
+    /// if ipv4 was found, _bytes is set to the byte representation of the ipv4 address
+    /// </summary>
+    /// <param name="host"></param>
+    /// <returns></returns>
+    private static byte[] TryDecodeHostToIPv4(string host)
+    {
+        var parts = CharUtils.SplitByDot(host);
+        var numParts = parts.Length;
+
+        if (numParts != 4 && numParts != 1)
+            return null;
+
+        var bytes = new byte[16];
+
+        //An ipv4 mapped ipv6 bytes will have the 11th and 12th byte as 0xff
+        bytes[10] = (byte)0xff;
+        bytes[11] = (byte)0xff;
+        for (var i = 0; i < parts.Length; i++)
         {
-            // null/empty check if needed:
-            if (host is null || host.Length < 3)
+            ReadOnlySpan<char> parsedNum;
+            int @base;
+            if (parts[i].StartsWith("0x"))
             {
-                return null;
+                //hex
+                parsedNum = parts[i].AsSpan(2);
+                @base = 16;
+            }
+            else if (parts[i][0] == '0')
+            {
+                //octal
+                parsedNum = parts[i].AsSpan(1);
+                @base = 8;
+            }
+            else
+            {
+                //decimal
+                parsedNum = parts[i];
+                @base = 10;
             }
 
-            if (host[0] == '[' && host[^1] == ']')
-            {
-                return TryDecodeHostToIPv6(host);
-            }
-
-            return TryDecodeHostToIPv4(host);
-        }
-
-        /// <summary>
-        /// This covers cases like:
-        /// Hexadecimal:        0x1283983
-        /// Decimal:            12839273
-        /// Octal:              037362273110
-        /// Dotted Decimal:     192.168.1.1
-        /// Dotted Hexadecimal: 0xfe.0x83.0x18.0x1
-        /// Dotted Octal:       0301.00.046.00
-        /// Dotted Mixed:       0x38.168.077.1
-        /// if ipv4 was found, _bytes is set to the byte representation of the ipv4 address
-        /// </summary>
-        /// <param name="host"></param>
-        /// <returns></returns>
-        private static byte[] TryDecodeHostToIPv4(string host)
-        {
-            string[] parts = CharUtils.SplitByDot(host);
-            int numParts = parts.Length;
-
-            if (numParts != 4 && numParts != 1)
-            {
-                return null;
-            }
-
-            byte[] bytes = new byte[16];
-
-            //An ipv4 mapped ipv6 bytes will have the 11th and 12th byte as 0xff
-            bytes[10] = (byte)0xff;
-            bytes[11] = (byte)0xff;
-            for (int i = 0; i < parts.Length; i++)
-            {
-                ReadOnlySpan<char> parsedNum;
-                int @base;
-                if (parts[i].StartsWith("0x"))
+            long section;
+            if (parsedNum == null || parsedNum.IsEmpty)
+                section = 0;
+            else
+                try
                 {
-                    //hex
-                    parsedNum = parts[i].AsSpan(2);
-                    @base = 16;
-                }
-                else if (parts[i][0] == '0')
-                {
-                    //octal
-                    parsedNum = parts[i].AsSpan(1);
-                    @base = 8;
-                }
-                else
-                {
-                    //decimal
-                    parsedNum = parts[i];
-                    @base = 10;
-                }
-
-                long section;
-                if (parsedNum == null || parsedNum.IsEmpty)
-                {
-                    section = 0;
-                }
-                else
-                {
-                    try
+                    if (16 == @base)
                     {
-                        if (16 == @base)
-                        {
-                            if (
-                                !long.TryParse(
-                                    parsedNum,
-                                    NumberStyles.AllowHexSpecifier,
-                                    CultureInfo.InvariantCulture,
-                                    out section
-                                )
+                        if (
+                            !long.TryParse(
+                                parsedNum,
+                                NumberStyles.AllowHexSpecifier,
+                                CultureInfo.InvariantCulture,
+                                out section
                             )
-                            {
-                                return null;
-                            }
-                        }
-                        else if (8 == @base)
-                        {
-                            if (!OctalEncodingHelper.TryParseOctal(parsedNum, out section))
-                            {
-                                return null;
-                            }
-                        }
-                        else
-                        {
-                            if (!long.TryParse(parsedNum, out section))
-                            {
-                                return null;
-                            }
-                        }
+                        )
+                            return null;
                     }
-                    catch (Exception)
+                    else if (8 == @base)
                     {
-                        return null;
+                        if (!OctalEncodingHelper.TryParseOctal(parsedNum, out section))
+                            return null;
+                    }
+                    else
+                    {
+                        if (!long.TryParse(parsedNum, out section))
+                            return null;
                     }
                 }
-
-                if (
-                    numParts == 4 && section > MAX_IPV4_PART
-                    || //This would look like 288.1.2.4
-                    numParts == 1 && section > MAX_NUMERIC_DOMAIN_VALUE
-                    || //This would look like 4294967299
-                    section < MIN_IP_PART
-                )
+                catch (Exception)
                 {
                     return null;
                 }
-                // bytes 13->16 is where the ipv4 address of an ipv4-mapped-ipv6-address is stored.
-                if (numParts == 4)
-                {
-                    var b = Convert.ToByte(section);
-                    bytes[IPV4_MAPPED_IPV6_START_OFFSET + i] = b; // section.byteValue();
-                }
-                else
-                {
-                    // numParts == 1
-                    int index = IPV4_MAPPED_IPV6_START_OFFSET;
-                    bytes[index++] = (byte)((section >> 24) & 0xFF);
-                    bytes[index++] = (byte)((section >> 16) & 0xFF);
-                    bytes[index++] = (byte)((section >> 8) & 0xFF);
-                    bytes[index] = (byte)(section & 0xFF);
-                    return bytes;
-                }
-            }
 
-            return bytes;
-        }
-
-        /// <summary>
-        /// Recommendation for IPv6 Address Text Representation
-        /// http://tools.ietf.org/html/rfc5952
-        ///
-        /// If ipv6 was found, _bytes is set to the byte representation of the ipv6 address
-        /// </summary>
-        /// <param name="host"></param>
-        /// <returns></returns>
-        private static byte[] TryDecodeHostToIPv6(string host)
-        {
-            // Would expect ip to be wrapped in [ and ]
-            var ip = host[1..^1];
-
-            var parts = new List<string>(ip.Split(':'));
-
-            if (parts.Count < 3)
-            {
+            if (
+                (numParts == 4 && section > MAX_IPV4_PART)
+                || //This would look like 288.1.2.4
+                (numParts == 1 && section > MAX_NUMERIC_DOMAIN_VALUE)
+                || //This would look like 4294967299
+                section < MIN_IP_PART
+            )
                 return null;
+            // bytes 13->16 is where the ipv4 address of an ipv4-mapped-ipv6-address is stored.
+            if (numParts == 4)
+            {
+                var b = Convert.ToByte(section);
+                bytes[IPV4_MAPPED_IPV6_START_OFFSET + i] = b; // section.byteValue();
+            }
+            else
+            {
+                // numParts == 1
+                var index = IPV4_MAPPED_IPV6_START_OFFSET;
+                bytes[index++] = (byte)((section >> 24) & 0xFF);
+                bytes[index++] = (byte)((section >> 16) & 0xFF);
+                bytes[index++] = (byte)((section >> 8) & 0xFF);
+                bytes[index] = (byte)(section & 0xFF);
+                return bytes;
+            }
+        }
+
+        return bytes;
+    }
+
+    /// <summary>
+    /// Recommendation for IPv6 Address Text Representation
+    /// http://tools.ietf.org/html/rfc5952
+    ///
+    /// If ipv6 was found, _bytes is set to the byte representation of the ipv6 address
+    /// </summary>
+    /// <param name="host"></param>
+    /// <returns></returns>
+    private static byte[] TryDecodeHostToIPv6(string host)
+    {
+        // Would expect ip to be wrapped in [ and ]
+        var ip = host[1..^1];
+
+        var parts = new List<string>(ip.Split(':'));
+
+        if (parts.Count < 3)
+            return null;
+
+        //Check for embedded ipv4 address
+        //string lastPart = parts.get(parts.size() - 1);
+        var lastPart = parts.Last();
+        var zoneIndexStart = lastPart.LastIndexOf('%');
+        var lastPartWithoutZoneIndex = zoneIndexStart == -1 ? lastPart : lastPart[..zoneIndexStart];
+        byte[] ipv4Address = null;
+        if (!IsHexSection(lastPartWithoutZoneIndex))
+            ipv4Address = TryDecodeHostToIPv4(lastPartWithoutZoneIndex);
+
+        var bytes = new byte[16];
+        //How many parts do we need to fill by the end of this for loop?
+        var totalSize = ipv4Address == null ? 8 : 6;
+        //How many zeroes did we fill in the case of double colons? Ex: [::1] will have numberOfFilledZeroes = 7
+        var numberOfFilledZeroes = 0;
+        //How many sections do we have to parse through? Ex: [fe80:ff::192.168.1.1] size = 3, another ex: [a:a::] size = 4
+        var size = ipv4Address == null ? parts.Count : parts.Count - 1;
+        for (var i = 0; i < size; i++)
+        {
+            var lenPart = parts[i].Length;
+            if (lenPart == 0 && i != 0 && i != parts.Count - 1)
+            {
+                numberOfFilledZeroes = totalSize - size;
+                for (var k = i; k < numberOfFilledZeroes + i; k++)
+                {
+                    var offset = k * 2;
+                    bytes[offset] = 0;
+                    bytes[offset + 1] = 0;
+                }
             }
 
-            //Check for embedded ipv4 address
-            //string lastPart = parts.get(parts.size() - 1);
-            var lastPart = parts.Last();
-            var zoneIndexStart = lastPart.LastIndexOf('%');
-            var lastPartWithoutZoneIndex =
-                zoneIndexStart == -1 ? lastPart : lastPart[..zoneIndexStart];
-            byte[] ipv4Address = null;
-            if (!IsHexSection(lastPartWithoutZoneIndex))
+            int section;
+
+            if (lenPart == 0)
             {
-                ipv4Address = TryDecodeHostToIPv4(lastPartWithoutZoneIndex);
+                section = 0;
             }
-
-            byte[] bytes = new byte[16];
-            //How many parts do we need to fill by the end of this for loop?
-            int totalSize = ipv4Address == null ? 8 : 6;
-            //How many zeroes did we fill in the case of double colons? Ex: [::1] will have numberOfFilledZeroes = 7
-            int numberOfFilledZeroes = 0;
-            //How many sections do we have to parse through? Ex: [fe80:ff::192.168.1.1] size = 3, another ex: [a:a::] size = 4
-            int size = ipv4Address == null ? parts.Count : parts.Count - 1;
-            for (int i = 0; i < size; i++)
+            else
             {
-                int lenPart = parts[i].Length;
-                if (lenPart == 0 && i != 0 && i != parts.Count - 1)
-                {
-                    numberOfFilledZeroes = totalSize - size;
-                    for (int k = i; k < numberOfFilledZeroes + i; k++)
-                    {
-                        int offset = k * 2;
-                        bytes[offset] = 0;
-                        bytes[offset + 1] = 0;
-                    }
-                }
-                int section;
-
-                if (lenPart == 0)
-                {
-                    section = 0;
-                }
-                else
-                {
-                    var wasParsed = int.TryParse(
-                        parts[i],
-                        NumberStyles.AllowHexSpecifier,
-                        CultureInfo.InvariantCulture,
-                        out section
-                    );
-                    if (!wasParsed)
-                        return null;
-                }
-
-                if (section > MAX_IPV6_PART || section < MIN_IP_PART)
-                {
-                    return null;
-                }
-                int byteOffset = (numberOfFilledZeroes + i) * 2;
-                bytes[byteOffset] = (byte)((section >> 8) & 0xff);
-                bytes[byteOffset + 1] = (byte)(section & 0xff);
-            }
-
-            if (ipv4Address != null)
-            {
-                Array.ConstrainedCopy(
-                    ipv4Address,
-                    IPV4_MAPPED_IPV6_START_OFFSET,
-                    bytes,
-                    IPV4_MAPPED_IPV6_START_OFFSET,
-                    NUMBER_BYTES_IN_IPV4
+                var wasParsed = int.TryParse(
+                    parts[i],
+                    NumberStyles.AllowHexSpecifier,
+                    CultureInfo.InvariantCulture,
+                    out section
                 );
-            }
-            return bytes;
-        }
-
-        private static bool IsHexSection(string section)
-        {
-            for (var i = 0; i < section.Length; i++)
-            {
-                if (!CharUtils.IsHex(section[i]))
-                {
-                    return false;
-                }
+                if (!wasParsed)
+                    return null;
             }
 
-            return true;
+            if (section > MAX_IPV6_PART || section < MIN_IP_PART)
+                return null;
+            var byteOffset = (numberOfFilledZeroes + i) * 2;
+            bytes[byteOffset] = (byte)((section >> 8) & 0xff);
+            bytes[byteOffset + 1] = (byte)(section & 0xff);
         }
 
-        public byte[] GetBytes()
-        {
-            return Bytes;
-        }
+        if (ipv4Address != null)
+            Array.ConstrainedCopy(
+                ipv4Address,
+                IPV4_MAPPED_IPV6_START_OFFSET,
+                bytes,
+                IPV4_MAPPED_IPV6_START_OFFSET,
+                NUMBER_BYTES_IN_IPV4
+            );
+        return bytes;
+    }
 
-        public string GetNormalizedHost()
-        {
-            return _normalizedHost;
-        }
+    private static bool IsHexSection(string section)
+    {
+        for (var i = 0; i < section.Length; i++)
+            if (!CharUtils.IsHex(section[i]))
+                return false;
+
+        return true;
+    }
+
+    public byte[] GetBytes()
+    {
+        return Bytes;
+    }
+
+    public string GetNormalizedHost()
+    {
+        return _normalizedHost;
     }
 }

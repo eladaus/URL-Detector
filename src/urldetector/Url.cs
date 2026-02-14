@@ -5,393 +5,360 @@ using System.Text;
 using urldetector.detection;
 using urldetector.eladaus;
 
-namespace urldetector
+namespace urldetector;
+
+/// <summary>
+/// Creating own Uri class since java.net.Uri would throw parsing exceptions
+/// for URL's considered ok by browsers.
+/// Also to avoid further conflict, this does stuff that the normal Uri object doesn't do:
+/// - Converts http://google.com/a/b/.//./../c to http://google.com/a/c
+/// - Decodes repeatedly so that http://host/%2525252525252525 becomes http://host/%25 while normal decoders
+/// would make it http://host/%25252525252525 (one less 25)
+/// - Removes tabs and new lines: http://www.google.com/foo\tbar\rbaz\n2 becomes "http://www.google.com/foobarbaz2"
+/// - Converts IP addresses: http://3279880203/blah becomes http://195.127.0.11/blah
+/// - Strips fragments (anything after #)
+/// </summary>
+public class Url
 {
-    /// <summary>
-    /// Creating own Uri class since java.net.Uri would throw parsing exceptions
-    /// for URL's considered ok by browsers.
-    /// Also to avoid further conflict, this does stuff that the normal Uri object doesn't do:
-    /// - Converts http://google.com/a/b/.//./../c to http://google.com/a/c
-    /// - Decodes repeatedly so that http://host/%2525252525252525 becomes http://host/%25 while normal decoders
-    /// would make it http://host/%25252525252525 (one less 25)
-    /// - Removes tabs and new lines: http://www.google.com/foo\tbar\rbaz\n2 becomes "http://www.google.com/foobarbaz2"
-    /// - Converts IP addresses: http://3279880203/blah becomes http://195.127.0.11/blah
-    /// - Strips fragments (anything after #)
-    /// </summary>
-    public class Url
+    private static readonly string DEFAULT_SCHEME = "http";
+    private static readonly Dictionary<string, int> SCHEME_PORT_MAP;
+    private string _fragment;
+    private string _host;
+    private readonly string _originalUrl;
+    private string _password;
+    private string _path;
+    private int _port;
+    private string _query;
+    private string _scheme;
+
+    private readonly UrlMarker _urlMarker;
+    private string _username;
+
+    static Url()
     {
-        private static readonly string DEFAULT_SCHEME = "http";
-        private static readonly Dictionary<string, int> SCHEME_PORT_MAP;
-        private string _fragment;
-        private string _host;
-        private readonly string _originalUrl;
-        private string _password;
-        private string _path;
-        private int _port;
-        private string _query;
-        private string _scheme;
+        SCHEME_PORT_MAP = new Dictionary<string, int>();
+        SCHEME_PORT_MAP.Add("http", 80);
+        SCHEME_PORT_MAP.Add("https", 443);
+        SCHEME_PORT_MAP.Add("ftp", 21);
+    }
 
-        private readonly UrlMarker _urlMarker;
-        private string _username;
+    protected internal Url(UrlMarker urlMarker)
+    {
+        _urlMarker = urlMarker;
+        _originalUrl = urlMarker.GetOriginalUrl();
+    }
 
-        static Url()
+    /// <summary>
+    /// Returns a url given a single url.
+    /// </summary>
+    /// <param name="url"></param>
+    /// <returns></returns>
+    public static Url Create(string url)
+    {
+        var formattedString = UrlUtil.RemoveSpecialSpaces(url.Trim().Replace(" ", "%20"));
+        var urls = new UrlDetector(
+            formattedString,
+            UrlDetectorOptions.ALLOW_SINGLE_LEVEL_DOMAIN
+        ).Detect();
+        if (urls.Count == 1)
+            return urls[0];
+
+        if (urls.Count == 0)
+            throw new MalformedUrlException("We couldn't find any urls in string: " + url);
+
+        throw new MalformedUrlException("We found more than one url in string: " + url);
+    }
+
+    /// <summary>
+    /// Returns a normalized url given a url object
+    /// </summary>
+    /// <returns></returns>
+    public NormalizedUrl Normalize()
+    {
+        return new NormalizedUrl(_urlMarker);
+    }
+
+    /// <summary>
+    /// Note that this includes the fragment
+    /// @return Formats the url to: [scheme]://[username]:[password]@[host]:[port]/[path]?[query]#[fragment]
+    /// </summary>
+    /// <returns></returns>
+    public string GetFullUrl()
+    {
+        var fragment = GetFragment();
+        if (string.IsNullOrEmpty(fragment))
+            fragment = string.Empty;
+        return GetFullUrlWithoutFragment() + fragment;
+    }
+
+    /// <summary>
+    /// Formats the url to: [scheme]://[username]:[password]@[host]:[port]/[path]?[query]
+    /// </summary>
+    /// <returns></returns>
+    public string GetFullUrlWithoutFragment()
+    {
+        var url = new StringBuilder();
+        if (!string.IsNullOrEmpty(GetScheme()))
         {
-            SCHEME_PORT_MAP = new Dictionary<string, int>();
-            SCHEME_PORT_MAP.Add("http", 80);
-            SCHEME_PORT_MAP.Add("https", 443);
-            SCHEME_PORT_MAP.Add("ftp", 21);
+            url.Append(GetScheme());
+            url.Append(":");
         }
 
-        protected internal Url(UrlMarker urlMarker)
+        url.Append("//");
+
+        if (!string.IsNullOrEmpty(GetUsername()))
         {
-            _urlMarker = urlMarker;
-            _originalUrl = urlMarker.GetOriginalUrl();
-        }
-
-        /// <summary>
-        /// Returns a url given a single url.
-        /// </summary>
-        /// <param name="url"></param>
-        /// <returns></returns>
-        public static Url Create(string url)
-        {
-            var formattedString = UrlUtil.RemoveSpecialSpaces(url.Trim().Replace(" ", "%20"));
-            var urls = new UrlDetector(
-                formattedString,
-                UrlDetectorOptions.ALLOW_SINGLE_LEVEL_DOMAIN
-            ).Detect();
-            if (urls.Count == 1)
-            {
-                return urls[0];
-            }
-
-            if (urls.Count == 0)
-            {
-                throw new MalformedUrlException("We couldn't find any urls in string: " + url);
-            }
-
-            throw new MalformedUrlException("We found more than one url in string: " + url);
-        }
-
-        /// <summary>
-        /// Returns a normalized url given a url object
-        /// </summary>
-        /// <returns></returns>
-        public NormalizedUrl Normalize()
-        {
-            return new NormalizedUrl(_urlMarker);
-        }
-
-        /// <summary>
-        /// Note that this includes the fragment
-        /// @return Formats the url to: [scheme]://[username]:[password]@[host]:[port]/[path]?[query]#[fragment]
-        /// </summary>
-        /// <returns></returns>
-        public string GetFullUrl()
-        {
-            var fragment = GetFragment();
-            if (string.IsNullOrEmpty(fragment))
-            {
-                fragment = string.Empty;
-            }
-            return GetFullUrlWithoutFragment() + fragment;
-        }
-
-        /// <summary>
-        /// Formats the url to: [scheme]://[username]:[password]@[host]:[port]/[path]?[query]
-        /// </summary>
-        /// <returns></returns>
-        public string GetFullUrlWithoutFragment()
-        {
-            var url = new StringBuilder();
-            if (!string.IsNullOrEmpty(GetScheme()))
-            {
-                url.Append(GetScheme());
-                url.Append(":");
-            }
-
-            url.Append("//");
-
-            if (!string.IsNullOrEmpty(GetUsername()))
-            {
-                url.Append(GetUsername());
-                if (!string.IsNullOrEmpty(GetPassword()))
-                {
-                    url.Append(":");
-                    url.Append(GetPassword());
-                }
-
-                url.Append("@");
-            }
-
-            url.Append(GetHost());
-            if (GetPort() > 0 && GetPort() != SCHEME_PORT_MAP[GetScheme()])
+            url.Append(GetUsername());
+            if (!string.IsNullOrEmpty(GetPassword()))
             {
                 url.Append(":");
-                url.Append(GetPort());
+                url.Append(GetPassword());
             }
 
-            url.Append(GetPath());
-            url.Append(GetQuery());
-
-            return url.ToString();
+            url.Append("@");
         }
 
-        public string GetScheme()
+        url.Append(GetHost());
+        if (GetPort() > 0 && GetPort() != SCHEME_PORT_MAP[GetScheme()])
         {
-            if (_scheme == null)
+            url.Append(":");
+            url.Append(GetPort());
+        }
+
+        url.Append(GetPath());
+        url.Append(GetQuery());
+
+        return url.ToString();
+    }
+
+    public string GetScheme()
+    {
+        if (_scheme == null)
+        {
+            if (Exists(UrlPart.SCHEME))
             {
-                if (Exists(UrlPart.SCHEME))
-                {
-                    // Start with whatever (possibly dirty) scheme data the parser gave us.
-                    _scheme = GetPart(UrlPart.SCHEME);
+                // Start with whatever (possibly dirty) scheme data the parser gave us.
+                _scheme = GetPart(UrlPart.SCHEME);
 
-                    var schemeLowered = _scheme.ToLowerInvariant();
+                var schemeLowered = _scheme.ToLowerInvariant();
 
-                    // See if the parser handed us a dirty scheme, e.g. input of ':u(https://test.co' -> scheme of ':u(https://'
+                // See if the parser handed us a dirty scheme, e.g. input of ':u(https://test.co' -> scheme of ':u(https://'
 
-                    // Most of the time, we assume we got a clean one, e.g. 'http://' for hashset lookup speed:
-                    if (UriSchemeLookup.UriSchemeNamesSuffixed.Contains(schemeLowered))
+                // Most of the time, we assume we got a clean one, e.g. 'http://' for hashset lookup speed:
+                if (UriSchemeLookup.UriSchemeNamesSuffixed.Contains(schemeLowered))
+                    _scheme = UriSchemeLookup.DesuffixUriScheme(_scheme);
+                else
+                    // Otherwise, we got a dirty one, lets find the longest matching suffix we can (e.g. sftp:// and ftp:// would
+                    // both match a dirty input of ':u(sftp://mysite.com' but obviously we want sftp as the longer, more accurate match
+                    for (
+                        var i = UriSchemeLookup.UriSchemeNamesSuffixedOrdered.Count - 1;
+                        i >= 0;
+                        i--
+                    )
                     {
-                        _scheme = UriSchemeLookup.DesuffixUriScheme(_scheme);
-                    }
-                    else
-                    {
-                        // Otherwise, we got a dirty one, lets find the longest matching suffix we can (e.g. sftp:// and ftp:// would
-                        // both match a dirty input of ':u(sftp://mysite.com' but obviously we want sftp as the longer, more accurate match
-                        for (
-                            var i = UriSchemeLookup.UriSchemeNamesSuffixedOrdered.Count - 1;
-                            i >= 0;
-                            i--
-                        )
+                        var compareScheme = UriSchemeLookup.UriSchemeNamesSuffixedOrdered[i];
+                        if (schemeLowered.EndsWith(compareScheme))
                         {
-                            var compareScheme = UriSchemeLookup.UriSchemeNamesSuffixedOrdered[i];
-                            if (schemeLowered.EndsWith(compareScheme))
-                            {
-                                _scheme = _scheme.Remove(0, _scheme.Length - compareScheme.Length);
-                                _scheme = UriSchemeLookup.DesuffixUriScheme(_scheme);
-                                break;
-                            }
+                            _scheme = _scheme.Remove(0, _scheme.Length - compareScheme.Length);
+                            _scheme = UriSchemeLookup.DesuffixUriScheme(_scheme);
+                            break;
                         }
                     }
-                }
-                else if (!_originalUrl.StartsWith("//"))
-                {
-                    _scheme = DEFAULT_SCHEME;
-                }
             }
-
-            return string.IsNullOrEmpty(_scheme) ? string.Empty : _scheme;
+            else if (!_originalUrl.StartsWith("//"))
+            {
+                _scheme = DEFAULT_SCHEME;
+            }
         }
 
-        public string GetUsername()
-        {
-            if (_username == null)
-            {
-                PopulateUsernamePassword();
-            }
+        return string.IsNullOrEmpty(_scheme) ? string.Empty : _scheme;
+    }
 
-            return string.IsNullOrEmpty(_username) ? string.Empty : _username;
+    public string GetUsername()
+    {
+        if (_username == null)
+            PopulateUsernamePassword();
+
+        return string.IsNullOrEmpty(_username) ? string.Empty : _username;
+    }
+
+    public string GetPassword()
+    {
+        if (_password == null)
+            PopulateUsernamePassword();
+
+        return string.IsNullOrEmpty(_password) ? string.Empty : _password;
+    }
+
+    public virtual string GetHost()
+    {
+        if (_host == null)
+        {
+            _host = GetPart(UrlPart.HOST);
+            if (Exists(UrlPart.PORT))
+                _host = _host.Substring(0, _host.Length - 1);
         }
 
-        public string GetPassword()
+        return _host;
+    }
+
+    /// <summary>
+    /// port = 0 means it hasn't been set yet. port = -1 means there is no port
+    /// </summary>
+    /// <returns></returns>
+    public int GetPort()
+    {
+        if (_port == 0)
         {
-            if (_password == null)
+            var portString = GetPart(UrlPart.PORT);
+            if (portString != null && !string.IsNullOrEmpty(portString))
             {
-                PopulateUsernamePassword();
-            }
-
-            return string.IsNullOrEmpty(_password) ? string.Empty : _password;
-        }
-
-        public virtual string GetHost()
-        {
-            if (_host == null)
-            {
-                _host = GetPart(UrlPart.HOST);
-                if (Exists(UrlPart.PORT))
-                {
-                    _host = _host.Substring(0, _host.Length - 1);
-                }
-            }
-
-            return _host;
-        }
-
-        /// <summary>
-        /// port = 0 means it hasn't been set yet. port = -1 means there is no port
-        /// </summary>
-        /// <returns></returns>
-        public int GetPort()
-        {
-            if (_port == 0)
-            {
-                var portString = GetPart(UrlPart.PORT);
-                if (portString != null && !string.IsNullOrEmpty(portString))
-                {
-                    var wasParsed = Int32.TryParse(portString, out _port);
-                    if (!wasParsed)
-                    {
-                        _port = -1;
-                    }
-                }
-                else if (SCHEME_PORT_MAP.ContainsKey(GetScheme()))
-                {
-                    _port = SCHEME_PORT_MAP[GetScheme()];
-                }
-                else
-                {
+                var wasParsed = int.TryParse(portString, out _port);
+                if (!wasParsed)
                     _port = -1;
-                }
             }
-
-            return _port;
-        }
-
-        public virtual string GetPath()
-        {
-            if (_path == null)
+            else if (SCHEME_PORT_MAP.ContainsKey(GetScheme()))
             {
-                _path = Exists(UrlPart.PATH) ? GetPart(UrlPart.PATH) : "/";
+                _port = SCHEME_PORT_MAP[GetScheme()];
             }
-
-            return _path;
-        }
-
-        public string GetQuery()
-        {
-            if (_query == null)
+            else
             {
-                _query = GetPart(UrlPart.QUERY);
+                _port = -1;
             }
-
-            return string.IsNullOrEmpty(_query) ? string.Empty : _query;
         }
 
-        public string GetFragment()
+        return _port;
+    }
+
+    public virtual string GetPath()
+    {
+        if (_path == null)
+            _path = Exists(UrlPart.PATH) ? GetPart(UrlPart.PATH) : "/";
+
+        return _path;
+    }
+
+    public string GetQuery()
+    {
+        if (_query == null)
+            _query = GetPart(UrlPart.QUERY);
+
+        return string.IsNullOrEmpty(_query) ? string.Empty : _query;
+    }
+
+    public string GetFragment()
+    {
+        if (_fragment == null)
+            _fragment = GetPart(UrlPart.FRAGMENT);
+
+        return string.IsNullOrEmpty(_fragment) ? string.Empty : _fragment;
+    }
+
+    /// <summary>
+    /// Always returns null for non normalized urls.
+    /// </summary>
+    /// <returns></returns>
+    public virtual byte[] GetHostBytes()
+    {
+        return null;
+    }
+
+    public string GetOriginalUrl()
+    {
+        return _originalUrl;
+    }
+
+    private void PopulateUsernamePassword()
+    {
+        if (Exists(UrlPart.USERNAME_PASSWORD))
         {
-            if (_fragment == null)
+            var usernamePassword = GetPart(UrlPart.USERNAME_PASSWORD);
+            var usernamePasswordParts = usernamePassword
+                .Substring(0, usernamePassword.Length - 1)
+                .Split(':');
+            if (usernamePasswordParts.Length == 1)
             {
-                _fragment = GetPart(UrlPart.FRAGMENT);
+                _username = usernamePasswordParts[0];
             }
-
-            return string.IsNullOrEmpty(_fragment) ? string.Empty : _fragment;
+            else if (usernamePasswordParts.Length == 2)
+            {
+                _username = usernamePasswordParts[0];
+                _password = usernamePasswordParts[1];
+            }
         }
+    }
 
-        /// <summary>
-        /// Always returns null for non normalized urls.
-        /// </summary>
-        /// <returns></returns>
-        public virtual byte[] GetHostBytes()
-        {
+    /// <summary>
+    /// @param urlPart The url part we are checking for existence
+    /// @return Returns true if the part exists.
+    /// </summary>
+    /// <param name="urlPart"></param>
+    /// <returns></returns>
+    private bool Exists(UrlPart? urlPart)
+    {
+        return urlPart != null && _urlMarker.IndexOf(urlPart.Value) >= 0;
+    }
+
+    /// <summary>
+    /// For example, in http://yahoo.com/lala/, nextExistingPart(UrlPart.HOST) would return UrlPart.PATH
+    /// @param urlPart The current url part
+    /// @return Returns the next part; if there is no existing next part, it returns null
+    /// </summary>
+    /// <param name="urlPart"></param>
+    /// <returns></returns>
+    private UrlPart? NextExistingPart(UrlPart urlPart)
+    {
+        var nextPart = urlPart.GetNextPart();
+        if (Exists(nextPart))
+            return nextPart;
+
+        if (nextPart == null)
             return null;
-        }
 
-        public string GetOriginalUrl()
-        {
-            return _originalUrl;
-        }
+        return NextExistingPart(nextPart.Value);
+    }
 
-        private void PopulateUsernamePassword()
-        {
-            if (Exists(UrlPart.USERNAME_PASSWORD))
-            {
-                var usernamePassword = GetPart(UrlPart.USERNAME_PASSWORD);
-                var usernamePasswordParts = usernamePassword
-                    .Substring(0, usernamePassword.Length - 1)
-                    .Split(':');
-                if (usernamePasswordParts.Length == 1)
-                {
-                    _username = usernamePasswordParts[0];
-                }
-                else if (usernamePasswordParts.Length == 2)
-                {
-                    _username = usernamePasswordParts[0];
-                    _password = usernamePasswordParts[1];
-                }
-            }
-        }
+    /// <summary>
+    /// @param part The part that we want. Ex: host, path
+    /// </summary>
+    /// <param name="part"></param>
+    /// <returns></returns>
+    private string GetPart(UrlPart part)
+    {
+        if (!Exists(part))
+            return null;
 
-        /// <summary>
-        /// @param urlPart The url part we are checking for existence
-        /// @return Returns true if the part exists.
-        /// </summary>
-        /// <param name="urlPart"></param>
-        /// <returns></returns>
-        private bool Exists(UrlPart? urlPart)
-        {
-            return urlPart != null && _urlMarker.IndexOf(urlPart.Value) >= 0;
-        }
+        var nextPart = NextExistingPart(part);
+        if (nextPart == null)
+            return _originalUrl.Substring(_urlMarker.IndexOf(part));
 
-        /// <summary>
-        /// For example, in http://yahoo.com/lala/, nextExistingPart(UrlPart.HOST) would return UrlPart.PATH
-        /// @param urlPart The current url part
-        /// @return Returns the next part; if there is no existing next part, it returns null
-        /// </summary>
-        /// <param name="urlPart"></param>
-        /// <returns></returns>
-        private UrlPart? NextExistingPart(UrlPart urlPart)
-        {
-            var nextPart = urlPart.GetNextPart();
-            if (Exists(nextPart))
-            {
-                return nextPart;
-            }
+        var beginIndex = _urlMarker.IndexOf(part);
+        var endIndex = _urlMarker.IndexOf(nextPart.Value);
+        return _originalUrl.Substring(beginIndex, endIndex - beginIndex);
+    }
 
-            if (nextPart == null)
-            {
-                return null;
-            }
+    protected void SetRawPath(string path)
+    {
+        _path = path;
+    }
 
-            return NextExistingPart(nextPart.Value);
-        }
+    protected void SetRawHost(string host)
+    {
+        _host = host;
+    }
 
-        /// <summary>
-        /// @param part The part that we want. Ex: host, path
-        /// </summary>
-        /// <param name="part"></param>
-        /// <returns></returns>
-        private string GetPart(UrlPart part)
-        {
-            if (!Exists(part))
-            {
-                return null;
-            }
+    protected string GetRawPath()
+    {
+        return _path;
+    }
 
-            var nextPart = NextExistingPart(part);
-            if (nextPart == null)
-            {
-                return _originalUrl.Substring(_urlMarker.IndexOf(part));
-            }
+    protected string GetRawHost()
+    {
+        return _host;
+    }
 
-            var beginIndex = _urlMarker.IndexOf(part);
-            var endIndex = _urlMarker.IndexOf(nextPart.Value);
-            return _originalUrl.Substring(beginIndex, endIndex - beginIndex);
-        }
-
-        protected void SetRawPath(string path)
-        {
-            _path = path;
-        }
-
-        protected void SetRawHost(string host)
-        {
-            _host = host;
-        }
-
-        protected string GetRawPath()
-        {
-            return _path;
-        }
-
-        protected string GetRawHost()
-        {
-            return _host;
-        }
-
-        protected UrlMarker GetUrlMarker()
-        {
-            return _urlMarker;
-        }
+    protected UrlMarker GetUrlMarker()
+    {
+        return _urlMarker;
     }
 }

@@ -13,39 +13,38 @@ using Perfolizer.Metrology;
 //using BenchmarkDotNet.Reports;
 //using BenchmarkDotNet.Running;
 
-namespace urldetector.benchmarks
+namespace urldetector.benchmarks;
+
+internal class Program
 {
-    class Program
+    private static void Main(string[] args)
     {
-        static void Main(string[] args)
+        Console.WriteLine("Hello BenchMarker!");
+
+        RunBenchmarks(args);
+    }
+
+    private static void RunBenchmarks(string[] args)
+    {
+        var configuration = new ManualConfig
         {
-            Console.WriteLine("Hello BenchMarker!");
+            SummaryStyle = new SummaryStyle(
+                CultureInfo.CurrentCulture,
+                true,
+                SizeUnit.KB,
+                TimeUnit.Millisecond,
+                true,
+                true
+            ),
+        };
 
-            RunBenchmarks(args);
-        }
+        configuration.AddExporter(DefaultConfig.Instance.GetExporters().ToArray());
+        configuration.AddLogger(DefaultConfig.Instance.GetLoggers().ToArray());
+        configuration.AddColumnProvider(DefaultConfig.Instance.GetColumnProviders().ToArray());
 
-        static void RunBenchmarks(string[] args)
-        {
-            var configuration = new ManualConfig()
-            {
-                SummaryStyle = new SummaryStyle(
-                    CultureInfo.CurrentCulture,
-                    printUnitsInHeader: true,
-                    sizeUnit: SizeUnit.KB,
-                    timeUnit: TimeUnit.Millisecond,
-                    printUnitsInContent: true,
-                    printZeroValuesInContent: true
-                ),
-            };
-
-            configuration.AddExporter(DefaultConfig.Instance.GetExporters().ToArray());
-            configuration.AddLogger(DefaultConfig.Instance.GetLoggers().ToArray());
-            configuration.AddColumnProvider(DefaultConfig.Instance.GetColumnProviders().ToArray());
-
-            // Run the benchmarks
-            var summary = BenchmarkSwitcher
-                .FromAssembly(typeof(Program).Assembly)
-                .Run(args, configuration);
-        }
+        // Run the benchmarks
+        var summary = BenchmarkSwitcher
+            .FromAssembly(typeof(Program).Assembly)
+            .Run(args, configuration);
     }
 }
