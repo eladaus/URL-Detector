@@ -1,5 +1,8 @@
 # URL Detector
 
+[![NuGet](https://img.shields.io/nuget/v/eladaus.urldetector.svg)](https://www.nuget.org/packages/eladaus.urldetector/)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/eladaus.urldetector.svg)](https://www.nuget.org/packages/eladaus.urldetector/)
+
 This codebase is an open source C# port of the Java code in https://github.com/URL-Detector/URL-Detector, which in turn
 was a fork of the LinkedIn Engineering team's open sourced https://github.com/linkedin/URL-Detector, which seems to be
 abandoned. This port was originally based the Java code as at July 20, 2019, and was created to allow continued
