@@ -12,7 +12,7 @@ jobs:
     
     env:
       PROJECT_PATH: './src/urldetector'   # adjust to the folder that contains your .csproj
-      
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -21,11 +21,13 @@ jobs:
           fetch-depth: 0
           # 👇 (optional) ensure it checks out the exact tag that triggered the run
           ref: ${{ github.ref }}
-          
+
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: |
+            8.0.x
+            10.0.x
 
       - name: Cache NuGet packages
         uses: actions/cache@v3

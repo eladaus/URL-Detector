@@ -1,13 +1,12 @@
-﻿namespace urldetector
+﻿namespace urldetector;
+
+public enum UrlPart
 {
-	public enum UrlPart
-	{
-		FRAGMENT,
-		QUERY,
-		PATH,
-		PORT,
-		HOST,
-		USERNAME_PASSWORD,
-		SCHEME
-	}
+    FRAGMENT,
+    QUERY,
+    PATH,
+    PORT,
+    HOST,
+    USERNAME_PASSWORD,
+    SCHEME,
 }

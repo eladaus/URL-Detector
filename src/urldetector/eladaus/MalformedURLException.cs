@@ -1,11 +1,9 @@
 ﻿using System;
 
-namespace urldetector.eladaus
+namespace urldetector.eladaus;
+
+public class MalformedUrlException : Exception
 {
-	public class MalformedUrlException : Exception
-	{
-		public MalformedUrlException(string message) : base(message)
-		{
-		}
-	}
+    public MalformedUrlException(string message)
+        : base(message) { }
 }
