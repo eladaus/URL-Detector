@@ -17,7 +17,7 @@ public class TestHostNormalizer
             new object[]
             {
                 "[BBBB:ab:f78F:f:DDDD:bab:56.7.7.5]",
-                "[bbbb:ab:f78f:f:dddd:bab:3807:705]",
+                "[bbbb:ab:f78f:f:dddd:bab:3807:705]"
             },
             new object[] { "[Aaaa::1]", "[aaaa::1]" },
             new object[] { "[::192.167.2.2]", "[::c0a7:202]" },
@@ -25,7 +25,18 @@ public class TestHostNormalizer
             new object[] { "[0::ffff:077.0x22.222.11]", "63.34.222.11" },
             new object[] { "192.168.1.1", "192.168.1.1" },
             new object[] { "0x92.168.1.1", "146.168.1.1" },
-            new object[] { "3279880203", "195.127.0.11" },
+            new object[] { "3279880203", "195.127.0.11" }
+        };
+
+    public static IEnumerable<object[]> GetNormalHosts =>
+        new List<object[]>
+        {
+            new object[] { "sALes.com" },
+            new object[] { "33r.nEt" },
+            new object[] { "173839.com" },
+            new object[] { "192.168.-3.1" },
+            new object[] { "[::-34:50]" },
+            new object[] { "[-34::192.168.34.-3]" }
         };
 
     [Theory]
@@ -50,17 +61,6 @@ public class TestHostNormalizer
         Assert.True(Arrays.equals(hostNormalizer.getBytes(), expectedBytes));
         */
     }
-
-    public static IEnumerable<object[]> GetNormalHosts =>
-        new List<object[]>
-        {
-            new object[] { "sALes.com" },
-            new object[] { "33r.nEt" },
-            new object[] { "173839.com" },
-            new object[] { "192.168.-3.1" },
-            new object[] { "[::-34:50]" },
-            new object[] { "[-34::192.168.34.-3]" },
-        };
 
     [Theory]
     [MemberData(nameof(GetNormalHosts))]

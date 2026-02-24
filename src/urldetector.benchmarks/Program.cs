@@ -35,7 +35,7 @@ internal class Program
                 TimeUnit.Millisecond,
                 true,
                 true
-            ),
+            )
         };
 
         configuration.AddExporter(DefaultConfig.Instance.GetExporters().ToArray());

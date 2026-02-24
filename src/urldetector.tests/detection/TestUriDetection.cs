@@ -21,7 +21,46 @@ public class TestUriDetection
             new object[] { "[::]" },
             new object[] { "[0::]" },
             new object[] { "[::1]" },
-            new object[] { "[0::1]" },
+            new object[] { "[0::1]" }
+        };
+
+    public static IEnumerable<object[]> GetIPv6Ipv4AddressTestStrings =>
+        new List<object[]>
+        {
+            new object[]
+            {
+                "[fe80:aaaa:aaaa:aaaa:3dd0:7f8e:192.168.1.1]",
+                "[fe80:aaaa:aaaa:aaaa:3dd0:7f8e:192.168.1.1]"
+            },
+            new object[]
+            {
+                "[bcad::aaaa:aaaa:3dd0:7f8e:222.168.1.1]",
+                "[bcad::aaaa:aaaa:3dd0:7f8e:222.168.1.1]"
+            },
+            new object[]
+            {
+                "[dead::85a3:0:0:8a2e:192.168.1.1]",
+                "[dead::85a3:0:0:8a2e:192.168.1.1]"
+            },
+            new object[] { "[::BEEF:0:8a2e:192.168.1.1]", "[::BEEF:0:8a2e:192.168.1.1]" },
+            new object[] { "[:BAD:BEEF:0:8a2e:192.168.1.1]", "192.168.1.1" },
+            new object[] { "[::beEE:EeEF:0:8a2e:192.168.1.1]", "[::beEE:EeEF:0:8a2e:192.168.1.1]" },
+            new object[] { "[::192.168.1.1]", "[::192.168.1.1]" },
+            new object[] { "[0::192.168.1.1]", "[0::192.168.1.1]" },
+            new object[] { "[::ffff:192.168.1.1]", "[::ffff:192.168.1.1]" },
+            new object[] { "[0::ffff:192.168.1.1]", "[0::ffff:192.168.1.1]" },
+            new object[] { "[0:ffff:192.168.1.1::]", "192.168.1.1" }
+        };
+
+    public static IEnumerable<object[]> GetHexOctalIpAddresses =>
+        new List<object[]>
+        {
+            new object[] { "http://[::ffff:0xC0.0x00.0x02.0xEB]", "%251" },
+            new object[] { "http://[::0301.0250.0002.0353]", "%251" },
+            new object[] { "http://[0::ffff:0xC0.0x00.0x02.0xEB]", "%223" },
+            new object[] { "http://[0::0301.0250.0002.0353]", "%2lalal-a." },
+            new object[] { "http://[::bad:ffff:0xC0.0x00.0x02.0xEB]", "%---" },
+            new object[] { "http://[::bad:ffff:0301.0250.0002.0353]", "%-.-.-.-....-....--" }
         };
 
     [Theory]
@@ -35,34 +74,6 @@ public class TestUriDetection
         RunTest("bobo " + testString, UrlDetectorOptions.Default, testString);
         RunTest("alkfs:afef:" + testString, UrlDetectorOptions.Default, testString);
     }
-
-    public static IEnumerable<object[]> GetIPv6Ipv4AddressTestStrings =>
-        new List<object[]>
-        {
-            new object[]
-            {
-                "[fe80:aaaa:aaaa:aaaa:3dd0:7f8e:192.168.1.1]",
-                "[fe80:aaaa:aaaa:aaaa:3dd0:7f8e:192.168.1.1]",
-            },
-            new object[]
-            {
-                "[bcad::aaaa:aaaa:3dd0:7f8e:222.168.1.1]",
-                "[bcad::aaaa:aaaa:3dd0:7f8e:222.168.1.1]",
-            },
-            new object[]
-            {
-                "[dead::85a3:0:0:8a2e:192.168.1.1]",
-                "[dead::85a3:0:0:8a2e:192.168.1.1]",
-            },
-            new object[] { "[::BEEF:0:8a2e:192.168.1.1]", "[::BEEF:0:8a2e:192.168.1.1]" },
-            new object[] { "[:BAD:BEEF:0:8a2e:192.168.1.1]", "192.168.1.1" },
-            new object[] { "[::beEE:EeEF:0:8a2e:192.168.1.1]", "[::beEE:EeEF:0:8a2e:192.168.1.1]" },
-            new object[] { "[::192.168.1.1]", "[::192.168.1.1]" },
-            new object[] { "[0::192.168.1.1]", "[0::192.168.1.1]" },
-            new object[] { "[::ffff:192.168.1.1]", "[::ffff:192.168.1.1]" },
-            new object[] { "[0::ffff:192.168.1.1]", "[0::ffff:192.168.1.1]" },
-            new object[] { "[0:ffff:192.168.1.1::]", "192.168.1.1" },
-        };
 
     [Theory]
     [MemberData(nameof(GetIPv6Ipv4AddressTestStrings))]
@@ -80,17 +91,6 @@ public class TestUriDetection
         testString = " " + testString;
         RunTest(testString, UrlDetectorOptions.Default, expectedString);
     }
-
-    public static IEnumerable<object[]> GetHexOctalIpAddresses =>
-        new List<object[]>
-        {
-            new object[] { "http://[::ffff:0xC0.0x00.0x02.0xEB]", "%251" },
-            new object[] { "http://[::0301.0250.0002.0353]", "%251" },
-            new object[] { "http://[0::ffff:0xC0.0x00.0x02.0xEB]", "%223" },
-            new object[] { "http://[0::0301.0250.0002.0353]", "%2lalal-a." },
-            new object[] { "http://[::bad:ffff:0xC0.0x00.0x02.0xEB]", "%---" },
-            new object[] { "http://[::bad:ffff:0301.0250.0002.0353]", "%-.-.-.-....-....--" },
-        };
 
     [Theory]
     [MemberData(nameof(GetHexOctalIpAddresses))]
@@ -128,7 +128,9 @@ public class TestUriDetection
         var found = parser.Detect();
         var foundArray = new string[found.Count];
         for (var i = 0; i < foundArray.Length; i++)
+        {
             foundArray[i] = found[i].GetOriginalUrl();
+        }
 
         // All expected items found, ordering irrelevant
         var areSame = !expected.Except(foundArray).Any() && expected.Length == foundArray.Length;
@@ -233,9 +235,9 @@ public class TestUriDetection
         //Really long addresses testing rules about total length of domain name and number of labels in a domain and size of each label.
         RunTest(
             "This will work: 1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.a.b.c.d.e.ly "
-                + "This will not work:  1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.a.b.c.d.e.f.ly "
-                + "This should as well: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.dddddddddddddddddddddddddddddddddddddddddddddddddddddd.bit.ly "
-                + "But this wont: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.dddddddddddddddddddddddddddddddddddddddddddddddddddddd.bit.ly.dbl.spamhaus.org",
+            + "This will not work:  1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.a.b.c.d.e.f.ly "
+            + "This should as well: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.dddddddddddddddddddddddddddddddddddddddddddddddddddddd.bit.ly "
+            + "But this wont: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.dddddddddddddddddddddddddddddddddddddddddddddddddddddd.bit.ly.dbl.spamhaus.org",
             UrlDetectorOptions.Default,
             "1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6.7.8.9.0.a.b.c.d.e.ly",
             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.dddddddddddddddddddddddddddddddddddddddddddddddddddddd.bit.ly"
@@ -429,7 +431,7 @@ public class TestUriDetection
     {
         RunTest(
             "this is an international domain: http://\u043F\u0440\u0438\u043c\u0435\u0440.\u0438\u0441\u043f\u044b"
-                + "\u0442\u0430\u043d\u0438\u0435 so is this: \u4e94\u7926\u767c\u5c55.\u4e2d\u570b.",
+            + "\u0442\u0430\u043d\u0438\u0435 so is this: \u4e94\u7926\u767c\u5c55.\u4e2d\u570b.",
             UrlDetectorOptions.Default,
             "http://\u043F\u0440\u0438\u043c\u0435\u0440.\u0438\u0441\u043f\u044b\u0442\u0430\u043d\u0438\u0435",
             "\u4e94\u7926\u767c\u5c55.\u4e2d\u570b."
@@ -754,7 +756,7 @@ public class TestUriDetection
         );
     }
 
-    ///<summary>
+    /// <summary>
     /// https://github.com/linkedin/URL-Detector/issues/12
     /// </summary>
     [Fact]
@@ -768,7 +770,7 @@ public class TestUriDetection
         );
     }
 
-    ///<summary>
+    /// <summary>
     /// https://github.com/linkedin/URL-Detector/issues/13
     /// </summary>
     [Fact]

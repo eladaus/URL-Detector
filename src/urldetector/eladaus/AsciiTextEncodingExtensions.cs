@@ -15,6 +15,7 @@ public static class AsciiTextEncodingExtensions
     {
         var sb = new StringBuilder();
         foreach (var c in value)
+        {
             if (c > 127)
             {
                 // This character is too big for ASCII
@@ -25,6 +26,7 @@ public static class AsciiTextEncodingExtensions
             {
                 sb.Append(c);
             }
+        }
 
         return sb.ToString();
     }

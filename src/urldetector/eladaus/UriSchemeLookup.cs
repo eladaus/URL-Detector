@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -7,7 +6,7 @@ namespace urldetector.eladaus;
 
 public static class UriSchemeLookup
 {
-    public static ImmutableHashSet<string> UriSchemeNames = ImmutableHashSet.CreateRange<string>(
+    public static ImmutableHashSet<string> UriSchemeNames = ImmutableHashSet.CreateRange(
         new List<string>
         {
             "aaa",
@@ -319,12 +318,28 @@ public static class UriSchemeLookup
             // "xmlrpc.beeps",
             "xmpp",
             "xri",
-            "ymsgr",
+            "ymsgr"
             // "z39.50",
             // "z39.50r",
             // "z39.50s"
         }
     );
+
+    static UriSchemeLookup()
+    {
+        UriSchemeNamesSuffixed =
+            // Add all the schemes with the usually-but-not-always-followed '://' suffix
+            UriSchemeNames
+                .Select(u => $"{u}://")
+                // Add those schemes that take a different, specific format (e.g. mailto, maybe geo uses ':' only)
+                .Union(UriSchemeNames.Where(u => u == "mailto").Select(u => $"{u}:"))
+                .ToImmutableHashSet();
+
+        UriSchemeNamesSuffixedOrdered = UriSchemeNamesSuffixed
+            .OrderBy(usns => usns.Length)
+            .ThenBy(usns => usns)
+            .ToImmutableList();
+    }
 
     /// <summary>
     /// E.g.
@@ -345,22 +360,6 @@ public static class UriSchemeLookup
     /// mailto://
     /// </summary>
     public static ImmutableList<string> UriSchemeNamesSuffixedOrdered { get; }
-
-    static UriSchemeLookup()
-    {
-        UriSchemeNamesSuffixed =
-            // Add all the schemes with the usually-but-not-always-followed '://' suffix
-            UriSchemeNames
-                .Select(u => $"{u}://")
-                // Add those schemes that take a different, specific format (e.g. mailto, maybe geo uses ':' only)
-                .Union(UriSchemeNames.Where(u => u == "mailto").Select(u => $"{u}:"))
-                .ToImmutableHashSet();
-
-        UriSchemeNamesSuffixedOrdered = UriSchemeNamesSuffixed
-            .OrderBy(usns => usns.Length)
-            .ThenBy(usns => usns)
-            .ToImmutableList();
-    }
 
     public static string DesuffixUriScheme(string suffixedScheme)
     {

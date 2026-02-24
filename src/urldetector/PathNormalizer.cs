@@ -16,7 +16,9 @@ public class PathNormalizer
     public string NormalizePath(string path)
     {
         if (string.IsNullOrEmpty(path))
+        {
             return path;
+        }
 
         path = UrlUtil.Decode(path);
         path = SanitizeDotsAndSlashes(path);
@@ -85,7 +87,9 @@ public class PathNormalizer
         }
 
         if (stringBuilder.Length == 0)
+        {
             stringBuilder.Append("/"); //Every path has at least a slash
+        }
 
         return stringBuilder.ToString();
     }

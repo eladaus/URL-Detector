@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Text;
 using urldetector.detection;
 using urldetector.eladaus;
@@ -22,16 +20,16 @@ public class Url
 {
     private static readonly string DEFAULT_SCHEME = "http";
     private static readonly Dictionary<string, int> SCHEME_PORT_MAP;
+    private readonly string _originalUrl;
+
+    private readonly UrlMarker _urlMarker;
     private string _fragment;
     private string _host;
-    private readonly string _originalUrl;
     private string _password;
     private string _path;
     private int _port;
     private string _query;
     private string _scheme;
-
-    private readonly UrlMarker _urlMarker;
     private string _username;
 
     static Url()
@@ -61,10 +59,14 @@ public class Url
             UrlDetectorOptions.ALLOW_SINGLE_LEVEL_DOMAIN
         ).Detect();
         if (urls.Count == 1)
+        {
             return urls[0];
+        }
 
         if (urls.Count == 0)
+        {
             throw new MalformedUrlException("We couldn't find any urls in string: " + url);
+        }
 
         throw new MalformedUrlException("We found more than one url in string: " + url);
     }
@@ -87,7 +89,10 @@ public class Url
     {
         var fragment = GetFragment();
         if (string.IsNullOrEmpty(fragment))
+        {
             fragment = string.Empty;
+        }
+
         return GetFullUrlWithoutFragment() + fragment;
     }
 
@@ -146,10 +151,13 @@ public class Url
 
                 // Most of the time, we assume we got a clean one, e.g. 'http://' for hashset lookup speed:
                 if (UriSchemeLookup.UriSchemeNamesSuffixed.Contains(schemeLowered))
+                {
                     _scheme = UriSchemeLookup.DesuffixUriScheme(_scheme);
+                }
                 else
                     // Otherwise, we got a dirty one, lets find the longest matching suffix we can (e.g. sftp:// and ftp:// would
                     // both match a dirty input of ':u(sftp://mysite.com' but obviously we want sftp as the longer, more accurate match
+                {
                     for (
                         var i = UriSchemeLookup.UriSchemeNamesSuffixedOrdered.Count - 1;
                         i >= 0;
@@ -164,6 +172,7 @@ public class Url
                             break;
                         }
                     }
+                }
             }
             else if (!_originalUrl.StartsWith("//"))
             {
@@ -177,7 +186,9 @@ public class Url
     public string GetUsername()
     {
         if (_username == null)
+        {
             PopulateUsernamePassword();
+        }
 
         return string.IsNullOrEmpty(_username) ? string.Empty : _username;
     }
@@ -185,7 +196,9 @@ public class Url
     public string GetPassword()
     {
         if (_password == null)
+        {
             PopulateUsernamePassword();
+        }
 
         return string.IsNullOrEmpty(_password) ? string.Empty : _password;
     }
@@ -196,7 +209,9 @@ public class Url
         {
             _host = GetPart(UrlPart.HOST);
             if (Exists(UrlPart.PORT))
+            {
                 _host = _host.Substring(0, _host.Length - 1);
+            }
         }
 
         return _host;
@@ -215,7 +230,9 @@ public class Url
             {
                 var wasParsed = int.TryParse(portString, out _port);
                 if (!wasParsed)
+                {
                     _port = -1;
+                }
             }
             else if (SCHEME_PORT_MAP.ContainsKey(GetScheme()))
             {
@@ -233,7 +250,9 @@ public class Url
     public virtual string GetPath()
     {
         if (_path == null)
+        {
             _path = Exists(UrlPart.PATH) ? GetPart(UrlPart.PATH) : "/";
+        }
 
         return _path;
     }
@@ -241,7 +260,9 @@ public class Url
     public string GetQuery()
     {
         if (_query == null)
+        {
             _query = GetPart(UrlPart.QUERY);
+        }
 
         return string.IsNullOrEmpty(_query) ? string.Empty : _query;
     }
@@ -249,7 +270,9 @@ public class Url
     public string GetFragment()
     {
         if (_fragment == null)
+        {
             _fragment = GetPart(UrlPart.FRAGMENT);
+        }
 
         return string.IsNullOrEmpty(_fragment) ? string.Empty : _fragment;
     }
@@ -310,10 +333,14 @@ public class Url
     {
         var nextPart = urlPart.GetNextPart();
         if (Exists(nextPart))
+        {
             return nextPart;
+        }
 
         if (nextPart == null)
+        {
             return null;
+        }
 
         return NextExistingPart(nextPart.Value);
     }
@@ -326,11 +353,15 @@ public class Url
     private string GetPart(UrlPart part)
     {
         if (!Exists(part))
+        {
             return null;
+        }
 
         var nextPart = NextExistingPart(part);
         if (nextPart == null)
+        {
             return _originalUrl.Substring(_urlMarker.IndexOf(part));
+        }
 
         var beginIndex = _urlMarker.IndexOf(part);
         var endIndex = _urlMarker.IndexOf(nextPart.Value);

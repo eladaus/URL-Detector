@@ -99,7 +99,14 @@ In code this looks like:
 
 ---
 
-## Developer Setup
+## Contributing
+
+### Prerequisites
+
+- [.NET 8 SDK](https://dotnet.microsoft.com/download) or later
+- An IDE that supports `.editorconfig` (e.g. [JetBrains Rider](https://www.jetbrains.com/rider/), Visual Studio, VS Code with C# extension)
+
+### Getting Started
 
 After cloning the repository, restore the local dotnet tools and install the Husky git hooks:
 
@@ -108,16 +115,45 @@ dotnet tool restore
 dotnet husky install
 ```
 
-This installs [CSharpier](https://csharpier.com/) and [Husky.Net](https://alirezanet.github.io/Husky.Net/) as local
-tools, and sets up a pre-commit hook that automatically formats staged `.cs` files with CSharpier before each commit.
+This installs [CSharpier](https://csharpier.com/) (code formatter) and [Husky.Net](https://alirezanet.github.io/Husky.Net/) (git hooks) as local tools, and sets up a **pre-commit hook** that automatically formats staged `.cs` files with CSharpier before each commit.
 
-To manually run CSharpier across the entire solution:
+### Code Style
+
+This project enforces consistent code style through several layers:
+
+| Tool / File | Purpose |
+|---|---|
+| [CSharpier](https://csharpier.com/) (`.csharpierrc.yaml`) | Opinionated code formatter — runs automatically on pre-commit |
+| `.editorconfig` | Enforces brace requirements and Rider/ReSharper formatting rules |
+| `EnforceCodeStyleInBuild` (csproj) | Promotes IDE code-style analyzers (e.g. IDE0011) to **build errors** |
+
+Key rules:
+
+- **Braces are always required** for `if`, `else`, `for`, `foreach`, `while`, `do-while`, `using`, `lock`, and `fixed` statements. The build will fail (error IDE0011) if braces are missing.
+- **Line width** is 100 characters (CSharpier).
+- **Do not modify** files under `src/urldetector.tests/` or `src/urldetector.tests.custom/` unless specifically adding new test cases.
+
+### Formatting
+
+CSharpier runs automatically via the pre-commit hook. To manually format the entire solution:
 
 ```bash
 dotnet csharpier format src/
 ```
 
-For more information, see the [CSharpier GitHub repository](https://github.com/belav/csharpier).
+If you use **JetBrains Rider**, install the [CSharpier plugin](https://plugins.jetbrains.com/plugin/18243-csharpier) for format-on-save support. The `.editorconfig` rules are picked up automatically by Rider's code cleanup and inspections.
+
+### Building & Testing
+
+```bash
+# Build
+dotnet build src/eladaus.urldetector.sln
+
+# Run tests
+dotnet test src/eladaus.urldetector.sln
+```
+
+The build enforces code-style rules as errors — fix any IDE0011 (or similar) violations before committing.
 
 ---
 

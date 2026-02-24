@@ -51,7 +51,7 @@ public class DomainNameReader
         /// <summary>
         /// This was actually not a domain at all.
         /// </summary>
-        ReadUserPass,
+        ReadUserPass
     }
 
     /// <summary>
@@ -118,25 +118,30 @@ public class DomainNameReader
     private static readonly string PERCENT_HEX_ENCODED_DOT = "%" + HEX_ENCODED_DOT;
 
     /// <summary>
+    /// The currently written string buffer.
+    /// </summary>
+    private readonly StringBuilder _buffer;
+
+    /// <summary>
     /// Contains the handler for each character match.
     /// </summary>
     //private readonly CharacterHandler _characterHandler;
     private readonly Action<char> _characterHandler;
 
     /// <summary>
-    /// Contains the input stream to read.
-    /// </summary>
-    private readonly InputTextReader _reader;
-
-    /// <summary>
-    /// The currently written string buffer.
-    /// </summary>
-    private readonly StringBuilder _buffer;
-
-    /// <summary>
     /// The domain name started with a partial domain name found. This is the original string of the domain name only.
     /// </summary>
     private readonly string _current;
+
+    /// <summary>
+    /// Detection option of this reader.
+    /// </summary>
+    private readonly UrlDetectorOptions _options;
+
+    /// <summary>
+    /// Contains the input stream to read.
+    /// </summary>
+    private readonly InputTextReader _reader;
 
     /// <summary>
     /// Keeps track of the number of characters since the last "." character
@@ -152,11 +157,6 @@ public class DomainNameReader
     /// Keeps track if the entire domain name is numeric.
     /// </summary>
     private bool _numeric;
-
-    /// <summary>
-    /// Detection option of this reader.
-    /// </summary>
-    private readonly UrlDetectorOptions _options;
 
     /// <summary>
     /// Keeps track if we are seeing an ipv6 type address.
@@ -218,10 +218,14 @@ public class DomainNameReader
         {
             // Handles the case where the string is ".hello"
             if (_current.Length == 1 && CharUtils.IsDot(_current[0]))
+            {
                 return ReaderNextState.InvalidDomainName;
+            }
 
             if (_current.Equals(PERCENT_HEX_ENCODED_DOT, StringComparison.OrdinalIgnoreCase))
+            {
                 return ReaderNextState.InvalidDomainName;
+            }
 
             //The location where the domain name started.
             _startDomainName = _buffer.Length - _current.Length;
@@ -250,7 +254,9 @@ public class DomainNameReader
 
                 //Is the length of the last part > 64 (plus one since we just incremented)
                 if (_currentLabelLength > MAX_LABEL_LENGTH)
+                {
                     return ReaderNextState.InvalidDomainName;
+                }
 
                 if (CharUtils.IsDot(curr))
                 {
@@ -332,7 +338,9 @@ public class DomainNameReader
                 // now after cutting if the buffer is just "." newStart > current
                 // (last character in current is invalid)
                 if (newStart >= _current.Length || (_buffer.Length == 1 && _buffer[0] == '.'))
+                {
                     return ReaderNextState.InvalidDomainName;
+                }
             }
         }
         else
@@ -353,7 +361,9 @@ public class DomainNameReader
     {
         //Read the current, and if its bad, just return.
         if (ReadCurrent() == ReaderNextState.InvalidDomainName)
+        {
             return ReaderNextState.InvalidDomainName;
+        }
 
         //If this is the first domain part, check if it's ip address in is hexa
         //similar to what is done on 'readCurrent' method
@@ -379,29 +389,37 @@ public class DomainNameReader
 
             if (curr == '/')
                 //continue by reading the path
+            {
                 return CheckDomainNameValid(ReaderNextState.ReadPath, curr);
+            }
 
             if (curr == ':' && (!_seenBracket || _seenCompleteBracketSet))
                 //Don't check for a port if it's in the middle of an ipv6 address
                 //continue by reading the port.
+            {
                 return CheckDomainNameValid(ReaderNextState.ReadPort, curr);
+            }
 
             if (curr == '?')
                 //continue by reading the query string
+            {
                 return CheckDomainNameValid(ReaderNextState.ReadQueryString, curr);
+            }
 
             if (curr == '#')
             {
                 //continue by reading the fragment
                 return CheckDomainNameValid(ReaderNextState.ReadFragment, curr);
             }
-            else if (curr == '@')
+
+            if (curr == '@')
             {
                 //this may not have been a domain after all, but rather a username/password instead
                 _reader.GoBack();
                 return ReaderNextState.ReadUserPass;
             }
-            else if (
+
+            if (
                 CharUtils.IsDot(curr)
                 || (
                     curr == '%'
@@ -441,7 +459,9 @@ public class DomainNameReader
 
                     //if the length of the last section is longer than or equal to 64, it's too long to be a valid domain
                     if (_currentLabelLength >= MAX_LABEL_LENGTH)
+                    {
                         return ReaderNextState.InvalidDomainName;
+                    }
                 }
             }
             else if (
@@ -497,10 +517,15 @@ public class DomainNameReader
                 else
                 {
                     if (isAllHexSoFar && !CharUtils.IsHex(curr))
+                    {
                         _numeric = false;
+                    }
+
                     //if its not numeric, remember that;
                     if (!isAllHexSoFar && !CharUtils.IsNumeric(curr))
+                    {
                         _numeric = false;
+                    }
 
                     //append to the states.
                     _buffer.Append(curr);
@@ -599,7 +624,9 @@ public class DomainNameReader
         {
             var topStart = _buffer.Length - _topLevelLength;
             if (_currentLabelLength == 0)
+            {
                 topStart--;
+            }
 
             topStart = Math.Max(topStart, 0);
 
@@ -621,7 +648,9 @@ public class DomainNameReader
         {
             //if it's valid, add the last character (if specified) and return the valid state.
             if (lastChar != null)
+            {
                 _buffer.Append(lastChar);
+            }
 
             return validState;
         }
@@ -660,21 +689,27 @@ public class DomainNameReader
                             out value
                         );
                         if (!isParsed)
+                        {
                             return true;
+                        }
                     }
                     else if (testDomain[0] == '0')
                     {
                         // octal
                         var possibleDomain = testDomain.AsSpan(1);
                         if (!OctalEncodingHelper.TryParseOctal(possibleDomain, out value))
+                        {
                             return false;
+                        }
                     }
                     else
                     {
                         // decimal
                         var isParsed = long.TryParse(testDomain, out value);
                         if (!isParsed)
+                        {
                             return false;
+                        }
                     }
 
                     valid = value <= MAX_NUMERIC_DOMAIN_VALUE && value >= MIN_NUMERIC_DOMAIN_VALUE;
@@ -734,7 +769,9 @@ public class DomainNameReader
                                     out section
                                 );
                                 if (!isParsed)
+                                {
                                     return false;
+                                }
                             }
                             else if (@base == 10)
                             {
@@ -745,7 +782,9 @@ public class DomainNameReader
                                     out section
                                 );
                                 if (!isParsed)
+                                {
                                     return false;
+                                }
                             }
                             else
                             {
@@ -753,7 +792,9 @@ public class DomainNameReader
                                 if (@base == 8)
                                 {
                                     if (!OctalEncodingHelper.TryParseOctal(parsedNum, out section))
+                                    {
                                         return false;
+                                    }
                                 }
                                 else
                                 {
@@ -763,7 +804,9 @@ public class DomainNameReader
                         }
 
                         if (section < MIN_IP_PART || section > MAX_IP_PART)
+                        {
                             valid = false;
+                        }
                     }
                     else
                     {
@@ -792,7 +835,9 @@ public class DomainNameReader
             || testDomain[0] != '['
             || (testDomain[1] == ':' && testDomain[2] != ':')
         )
+        {
             return false;
+        }
 
         var numSections = 1;
         var hexDigits = 0;
@@ -838,9 +883,13 @@ public class DomainNameReader
                     if (!hexSection && (!zoneIndiceMode || testDomain[index] == '%'))
                     {
                         if (IsValidIpv4(lastSection.ToString()))
+                        {
                             numSections++; //ipv4 takes up 2 sections.
+                        }
                         else
+                        {
                             return false;
+                        }
                     }
 
                     break;
@@ -849,14 +898,18 @@ public class DomainNameReader
                     {
                         if (doubleColonFlag)
                             //only allowed to have one "::" in an ipv6 address.
+                        {
                             return false;
+                        }
 
                         doubleColonFlag = true;
                     }
 
                     //This means that we reached invalid characters in the previous section
                     if (!hexSection)
+                    {
                         return false;
+                    }
 
                     hexSection = true; //reset hex to true
                     hexDigits = 0; //reset count for hex digits
@@ -867,22 +920,30 @@ public class DomainNameReader
                     if (zoneIndiceMode)
                     {
                         if (!CharUtils.IsUnreserved(testDomain[index]))
+                        {
                             return false;
+                        }
                     }
                     else
                     {
                         lastSection.Append(testDomain[index]); //collect our possible ipv4 address
                         if (hexSection && CharUtils.IsHex(testDomain[index]))
+                        {
                             hexDigits++;
+                        }
                         else
+                        {
                             hexSection = false; //non hex digit.
+                        }
                     }
 
                     break;
             }
 
             if (hexDigits > 4 || numSections > 8)
+            {
                 return false;
+            }
 
             prevChar = testDomain[index];
         }

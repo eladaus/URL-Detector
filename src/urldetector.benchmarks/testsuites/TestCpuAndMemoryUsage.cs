@@ -21,6 +21,14 @@ public class TestCpuAndMemoryUsage
         | UrlDetectorOptions.SINGLE_QUOTE_MATCH
         | UrlDetectorOptions.XML;
 
+    public string InputTextTiny { get; set; }
+
+    public string InputTextSmall { get; set; }
+
+    public string InputTextMedium { get; set; }
+
+    public string InputTextLarge { get; set; }
+
     [GlobalSetup]
     public void SetupTestData()
     {
@@ -36,15 +44,11 @@ public class TestCpuAndMemoryUsage
         var links = new UrlDetector(InputTextTiny, flags).Detect();
     }
 
-    public string InputTextTiny { get; set; }
-
     [Benchmark]
     public void TestOnSmallAmountOfText()
     {
         var links = new UrlDetector(InputTextSmall, flags).Detect();
     }
-
-    public string InputTextSmall { get; set; }
 
     [Benchmark]
     public void TestOnMediumAmountOfText()
@@ -52,13 +56,9 @@ public class TestCpuAndMemoryUsage
         var links = new UrlDetector(InputTextMedium, flags).Detect();
     }
 
-    public string InputTextMedium { get; set; }
-
     [Benchmark]
     public void TestOnLargeAmountOfText()
     {
         var links = new UrlDetector(InputTextLarge, flags).Detect();
     }
-
-    public string InputTextLarge { get; set; }
 }

@@ -13,11 +13,6 @@ public class InputTextReader
     private readonly string _content;
 
     /// <summary>
-    /// Total length of the input character array
-    /// </summary>
-    public int ContentLength => _content.Length;
-
-    /// <summary>
     /// The current position in the content we are looking at.
     /// </summary>
     private int _index;
@@ -30,6 +25,11 @@ public class InputTextReader
     {
         _content = content;
     }
+
+    /// <summary>
+    /// Total length of the input character array
+    /// </summary>
+    public int ContentLength => _content.Length;
 
     /// <summary>
     /// Reads a single char from the content stream and increments the index.
@@ -74,7 +74,9 @@ public class InputTextReader
     public char PeekChar(int offset)
     {
         if (!CanReadChars(offset))
+        {
             throw new IndexOutOfRangeException();
+        }
 
         return _content[_index + offset];
     }

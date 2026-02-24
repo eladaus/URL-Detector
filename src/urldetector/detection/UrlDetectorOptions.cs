@@ -55,5 +55,5 @@ public enum UrlDetectorOptions
     /// <summary>
     /// Checks for single level domains as well. Ex: go/, http://localhost
     /// </summary>
-    ALLOW_SINGLE_LEVEL_DOMAIN = 32, //00100000
+    ALLOW_SINGLE_LEVEL_DOMAIN = 32 //00100000
 }

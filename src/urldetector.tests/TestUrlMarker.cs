@@ -19,7 +19,7 @@ public class TestUrlMarker
                 "/",
                 "",
                 "",
-                new[] { -1, 0, 6, -1, -1, -1, -1 },
+                new[] { -1, 0, 6, -1, -1, -1, -1 }
             },
             new object[]
             {
@@ -32,7 +32,7 @@ public class TestUrlMarker
                 "/",
                 "",
                 "",
-                new[] { 0, 7, 13, -1, -1, -1, -1 },
+                new[] { 0, 7, 13, -1, -1, -1, -1 }
             },
             new object[]
             {
@@ -45,7 +45,7 @@ public class TestUrlMarker
                 "/",
                 "",
                 "",
-                new[] { -1, 0, 6, -1, -1, -1, -1 },
+                new[] { -1, 0, 6, -1, -1, -1, -1 }
             },
             new object[]
             {
@@ -58,7 +58,7 @@ public class TestUrlMarker
                 "/h",
                 "?hello=w",
                 "#abc",
-                new[] { 0, 8, 13, -1, 23, 25, 33 },
+                new[] { 0, 8, 13, -1, 23, 25, 33 }
             },
             new object[]
             {
@@ -71,7 +71,7 @@ public class TestUrlMarker
                 "/",
                 "",
                 "#fa",
-                new[] { -1, -1, 0, 15, -1, -1, 17 },
+                new[] { -1, -1, 0, 15, -1, -1, 17 }
             },
             new object[]
             {
@@ -84,7 +84,7 @@ public class TestUrlMarker
                 "/",
                 "?fff",
                 "#aa",
-                new[] { -1, -1, 0, 15, -1, 17, 21 },
+                new[] { -1, -1, 0, 15, -1, 17, 21 }
             },
             new object[]
             {
@@ -97,7 +97,7 @@ public class TestUrlMarker
                 "/",
                 "",
                 "#fa",
-                new[] { -1, -1, 0, -1, -1, -1, 14 },
+                new[] { -1, -1, 0, -1, -1, -1, 14 }
             },
             new object[]
             {
@@ -110,7 +110,7 @@ public class TestUrlMarker
                 "/",
                 "?3fd",
                 "#fa",
-                new[] { -1, -1, 0, -1, -1, 14, 18 },
+                new[] { -1, -1, 0, -1, -1, 14, 18 }
             },
             new object[]
             {
@@ -123,7 +123,7 @@ public class TestUrlMarker
                 "/",
                 "",
                 "",
-                new[] { -1, -1, 2, -1, 16, -1, -1 },
+                new[] { -1, -1, 2, -1, 16, -1, -1 }
             },
             new object[]
             {
@@ -136,7 +136,7 @@ public class TestUrlMarker
                 "/",
                 "",
                 "",
-                new[] { 0, -1, 7, -1, 21, -1, -1 },
+                new[] { 0, -1, 7, -1, 21, -1, -1 }
             },
             new object[]
             {
@@ -149,7 +149,7 @@ public class TestUrlMarker
                 "/",
                 "",
                 "",
-                new[] { 0, 6, 18, -1, 28, -1, -1 },
+                new[] { 0, 6, 18, -1, 28, -1, -1 }
             },
             new object[]
             {
@@ -162,7 +162,7 @@ public class TestUrlMarker
                 "/dhdh",
                 "",
                 "",
-                new[] { -1, 0, 10, 17, 21, -1, -1 },
+                new[] { -1, 0, 10, 17, 21, -1, -1 }
             },
             new object[]
             {
@@ -175,7 +175,7 @@ public class TestUrlMarker
                 "/dhdh/@1234",
                 "",
                 "",
-                new[] { -1, 0, 6, 15, 17, -1, -1 },
+                new[] { -1, 0, 6, 15, 17, -1, -1 }
             },
             new object[]
             {
@@ -188,7 +188,7 @@ public class TestUrlMarker
                 "/dhdeh/@1234",
                 "",
                 "",
-                new[] { -1, -1, 0, 10, 13, -1, -1 },
+                new[] { -1, -1, 0, 10, 13, -1, -1 }
             },
             new object[]
             {
@@ -201,7 +201,7 @@ public class TestUrlMarker
                 "/dhdeh/@1234",
                 "?aj=r",
                 "",
-                new[] { -1, 0, 7, -1, 15, 27, -1 },
+                new[] { -1, 0, 7, -1, 15, 27, -1 }
             },
             new object[]
             {
@@ -214,7 +214,7 @@ public class TestUrlMarker
                 "/doop/@1234",
                 "",
                 "",
-                new[] { -1, 0, 7, -1, 16, -1, -1 },
+                new[] { -1, 0, 7, -1, 16, -1, -1 }
             },
             new object[]
             {
@@ -227,7 +227,7 @@ public class TestUrlMarker
                 "/lala/@1234/@dfd@df",
                 "?@dsf",
                 "#ono",
-                new[] { -1, -1, 0, -1, 7, 26, 31 },
+                new[] { -1, -1, 0, -1, 7, 26, 31 }
             },
             new object[]
             {
@@ -240,8 +240,8 @@ public class TestUrlMarker
                 "/",
                 "?why=is&this=test",
                 "#?@Sdsf",
-                new[] { 0, 8, 18, 33, 35, 36, 53 },
-            },
+                new[] { 0, 8, 18, 33, 35, 36, 53 }
+            }
         };
 
     [Theory]

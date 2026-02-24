@@ -10,78 +10,20 @@ namespace urldetector.detection;
 public class UrlDetector
 {
     /// <summary>
-    /// The states to use to continue writing or not.
-    /// </summary>
-    private enum ReadEndState
-    {
-        /// <summary>
-        /// The current url is valid.
-        /// </summary>
-        ValidUrl,
-
-        /// <summary>
-        /// The current url is invalid.
-        /// </summary>
-        InvalidUrl,
-    }
-
-    /// <summary>
-    /// Valid protocol schemes.
-    /// </summary>
-    private HashSet<string> ValidSchemesSuffixed { get; } = [];
-
-    private HashSet<string> ValidSchemesNames { get; } = [];
-
-    private ImmutableArray<string> _validSchemesSuffixedOrdered;
-
-    private ImmutableArray<string> ValidSchemesSuffixedOrdered
-    {
-        get
-        {
-            if (_validSchemesSuffixedOrdered == null)
-                _validSchemesSuffixedOrdered =
-                [
-                    .. ValidSchemesSuffixed.OrderBy(usns => usns.Length).ThenBy(usns => usns),
-                ];
-
-            return _validSchemesSuffixedOrdered;
-        }
-    }
-
-    /// <summary>
-    /// Take a list of strings like 'ftp', 'http', 'attachment' and append them as a full
-    /// searchable instance to the collection of schemes to find in the input, like
-    /// 'ftp://', 'ftp%3a//', 'http://', 'http%3a//' etc.
-    /// </summary>
-    /// <param name="validSchemes"></param>
-    private void SetValidSchemes(IEnumerable<string> validSchemes)
-    {
-        ValidSchemesNames.Clear();
-        ValidSchemesSuffixed.Clear();
-
-        foreach (var validScheme in validSchemes)
-        {
-            var lowerInvariant = validScheme.Trim().ToLowerInvariant();
-            ValidSchemesNames.Add(lowerInvariant);
-            ValidSchemesSuffixed.Add(lowerInvariant + "://");
-            ValidSchemesSuffixed.Add(lowerInvariant + "%3a//");
-        }
-    }
-
-    /// <summary>
     /// Maximum number of times a character at a particular index can be read by url detection algorithm before
     /// we force it to be skipped over (to prevents excessive backtracking and infinite-loops)
     /// </summary>
     private static readonly int CONTENT_READ_BY_INDEX_MAXIMUM = 10;
 
     /// <summary>
-    /// Return a readonly copy of the schemes that the UrlDetector is currently configured to detect
+    /// Buffer to store temporary urls inside.
     /// </summary>
-    /// <returns></returns>
-    public HashSet<string> ListValidSchemes()
-    {
-        return [.. ValidSchemesNames];
-    }
+    private readonly StringBuilder _buffer = new();
+
+    /// <summary>
+    /// Keeps the count of special characters used to match quotes and different types of brackets.
+    /// </summary>
+    private readonly Dictionary<char, int> _characterMatch = new();
 
     /// <summary>
     /// Stores options for detection.
@@ -94,14 +36,9 @@ public class UrlDetector
     private readonly InputTextReader _reader;
 
     /// <summary>
-    /// Buffer to store temporary urls inside.
+    /// Stores the found urls.
     /// </summary>
-    private readonly StringBuilder _buffer = new();
-
-    /// <summary>
-    /// Keeps the count of special characters used to match quotes and different types of brackets.
-    /// </summary>
-    private readonly Dictionary<char, int> _characterMatch = new();
+    private readonly List<Url> _urlList = new();
 
     /// <summary>
     /// Keeps track of certain indices to create an Url object.
@@ -128,10 +65,7 @@ public class UrlDetector
     /// </summary>
     private bool _singleQuoteStart;
 
-    /// <summary>
-    /// Stores the found urls.
-    /// </summary>
-    private readonly List<Url> _urlList = new();
+    private ImmutableArray<string> _validSchemesSuffixedOrdered;
 
     /// <summary>
     /// Creates a new UrlDetector object used to find urls inside of text.
@@ -151,9 +85,63 @@ public class UrlDetector
         _options = options;
 
         if (validSchemes == null || validSchemes.Count == 0)
+        {
             validSchemes = ["http", "https", "ftp", "ftps"];
+        }
 
         SetValidSchemes(validSchemes);
+    }
+
+    /// <summary>
+    /// Valid protocol schemes.
+    /// </summary>
+    private HashSet<string> ValidSchemesSuffixed { get; } = [];
+
+    private HashSet<string> ValidSchemesNames { get; } = [];
+
+    private ImmutableArray<string> ValidSchemesSuffixedOrdered
+    {
+        get
+        {
+            if (_validSchemesSuffixedOrdered == null)
+            {
+                _validSchemesSuffixedOrdered =
+                [
+                    .. ValidSchemesSuffixed.OrderBy(usns => usns.Length).ThenBy(usns => usns)
+                ];
+            }
+
+            return _validSchemesSuffixedOrdered;
+        }
+    }
+
+    /// <summary>
+    /// Take a list of strings like 'ftp', 'http', 'attachment' and append them as a full
+    /// searchable instance to the collection of schemes to find in the input, like
+    /// 'ftp://', 'ftp%3a//', 'http://', 'http%3a//' etc.
+    /// </summary>
+    /// <param name="validSchemes"></param>
+    private void SetValidSchemes(IEnumerable<string> validSchemes)
+    {
+        ValidSchemesNames.Clear();
+        ValidSchemesSuffixed.Clear();
+
+        foreach (var validScheme in validSchemes)
+        {
+            var lowerInvariant = validScheme.Trim().ToLowerInvariant();
+            ValidSchemesNames.Add(lowerInvariant);
+            ValidSchemesSuffixed.Add(lowerInvariant + "://");
+            ValidSchemesSuffixed.Add(lowerInvariant + "%3a//");
+        }
+    }
+
+    /// <summary>
+    /// Return a readonly copy of the schemes that the UrlDetector is currently configured to detect
+    /// </summary>
+    /// <returns></returns>
+    public HashSet<string> ListValidSchemes()
+    {
+        return [.. ValidSchemesNames];
     }
 
     /// <summary>
@@ -208,7 +196,10 @@ public class UrlDetector
                     {
                         _reader.GoBack();
                         if (!ReadDomainName(_buffer.ToString(length)))
+                        {
                             ReadEnd(ReadEndState.InvalidUrl);
+                        }
+
                         ;
                     }
 
@@ -236,7 +227,10 @@ public class UrlDetector
                             _buffer.Append(_reader.Read());
 
                             if (!ReadDomainName(_buffer.ToString(length)))
+                            {
                                 ReadEnd(ReadEndState.InvalidUrl);
+                            }
+
                             length = 0;
                         }
                     }
@@ -248,7 +242,10 @@ public class UrlDetector
                 case '.': //"." was found, read the domain name using the start from length.
                     _buffer.Append(curr);
                     if (!ReadDomainName(_buffer.ToString(length)))
+                    {
                         ReadEnd(ReadEndState.InvalidUrl);
+                    }
+
                     length = 0;
                     break;
                 case '@': //Check the domain name after a username
@@ -257,7 +254,10 @@ public class UrlDetector
                         _currentUrlMarker.SetIndex(UrlPart.USERNAME_PASSWORD, length);
                         _buffer.Append(curr);
                         if (!ReadDomainName(null))
+                        {
                             ReadEnd(ReadEndState.InvalidUrl);
+                        }
+
                         length = 0;
                     }
 
@@ -266,17 +266,21 @@ public class UrlDetector
                     if (_dontMatchIpv6)
                         //Check if we need to match characters. If we match characters and this is a start or stop of range,
                         //either way reset the world and start processing again.
+                    {
                         if (CheckMatchingCharacter(curr) != CharacterMatch.CharacterNotMatched)
                         {
                             ReadEnd(ReadEndState.InvalidUrl);
                             length = 0;
                         }
+                    }
 
                     var beginning = _reader.GetPosition();
 
                     //if it doesn't have a scheme, clear the buffer.
                     if (!_hasScheme)
+                    {
                         _buffer.Clear();
+                    }
 
                     _buffer.Append(curr);
 
@@ -310,7 +314,9 @@ public class UrlDetector
                         //unread this "/" and continue to check the domain name starting from the beginning of the domain
                         _reader.GoBack();
                         if (!ReadDomainName(_buffer.ToString(length)))
+                        {
                             ReadEnd(ReadEndState.InvalidUrl);
+                        }
 
                         length = 0;
                     }
@@ -352,8 +358,12 @@ public class UrlDetector
             && _buffer.Length > 0
             && _hasScheme
         )
+        {
             if (!ReadDomainName(_buffer.ToString(length)))
+            {
                 ReadEnd(ReadEndState.InvalidUrl);
+            }
+        }
     }
 
     /// <summary>
@@ -373,9 +383,13 @@ public class UrlDetector
 
                 // Check buffer length before clearing it; set length to 0 if buffer is empty
                 if (_buffer.Length > 0)
+                {
                     _buffer.Remove(_buffer.Length - 1, 1);
+                }
                 else
+                {
                     length = 0;
+                }
 
                 var backtrackOnFail = _reader.GetPosition() - _buffer.Length + length;
                 if (!ReadDomainName(_buffer.ToString(length)))
@@ -407,7 +421,9 @@ public class UrlDetector
             _reader.GoBack(); //unread the ":" so readDomainName can take care of the port
             _buffer.Remove(_buffer.Length - 1, 1);
             if (!ReadDomainName(_buffer.ToString()))
+            {
                 ReadEnd(ReadEndState.InvalidUrl);
+            }
         }
         else
         {
@@ -533,7 +549,9 @@ public class UrlDetector
     {
         //end of input then go away.
         if (_reader.Eof())
+        {
             return false;
+        }
 
         //read the next character. If its // then return true.
         var curr = _reader.Read();
@@ -590,7 +608,10 @@ public class UrlDetector
                         {
                             // see if we need to remove extra characters from the start of the buffer
                             if (bufferedUrlContent.Length > vss.Length)
+                            {
                                 _buffer.Remove(0, bufferedUrlContent.Length - vss.Length);
+                            }
+
                             _currentUrlMarker.SetIndex(UrlPart.SCHEME, 0);
                             return true;
                         }
@@ -757,7 +778,9 @@ public class UrlDetector
 
             //if it's the end or space, then a valid url was read.
             if (curr == ' ' || CheckMatchingCharacter(curr) != CharacterMatch.CharacterNotMatched)
+            {
                 return ReadEnd(ReadEndState.ValidUrl);
+            }
 
             //otherwise keep appending.
             _buffer.Append(curr);
@@ -788,7 +811,9 @@ public class UrlDetector
 
             if (curr == ' ' || CheckMatchingCharacter(curr) != CharacterMatch.CharacterNotMatched)
                 //end of query string
+            {
                 return ReadEnd(ReadEndState.ValidUrl);
+            }
 
             //all else add to buffer.
             _buffer.Append(curr);
@@ -845,7 +870,9 @@ public class UrlDetector
                 //no port found; it was something like google.com:hello.world
                 if (portLen == 1)
                     //remove the ":" from the end.
+                {
                     _buffer.Remove(_buffer.Length - 1, 1);
+                }
 
                 _currentUrlMarker.UnsetIndex(UrlPart.PORT);
                 return ReadEnd(ReadEndState.ValidUrl);
@@ -873,7 +900,9 @@ public class UrlDetector
 
             if (curr == ' ' || CheckMatchingCharacter(curr) != CharacterMatch.CharacterNotMatched)
                 //if end of state and we got here, then the url is valid.
+            {
                 return ReadEnd(ReadEndState.ValidUrl);
+            }
 
             //append the char
             _buffer.Append(curr);
@@ -881,11 +910,15 @@ public class UrlDetector
             //now see if we move to another state.
             if (curr == '?')
                 //if ? read query string
+            {
                 return ReadQueryString();
+            }
 
             if (curr == '#')
                 //if # read the fragment
+            {
                 return ReadFragment();
+            }
         }
 
         //end of input then this url is good.
@@ -906,7 +939,9 @@ public class UrlDetector
             var len = _buffer.Length;
             var startIndex = len - 1;
             if (_quoteStart && _buffer[startIndex] == '\"')
+            {
                 _buffer.Remove(startIndex, len - startIndex);
+            }
 
             //Add the url to the list of good urls.
             if (_buffer.Length > 0)
@@ -930,6 +965,22 @@ public class UrlDetector
     }
 
     /// <summary>
+    /// The states to use to continue writing or not.
+    /// </summary>
+    private enum ReadEndState
+    {
+        /// <summary>
+        /// The current url is valid.
+        /// </summary>
+        ValidUrl,
+
+        /// <summary>
+        /// The current url is invalid.
+        /// </summary>
+        InvalidUrl
+    }
+
+    /// <summary>
     /// The response of character matching.
     /// </summary>
     private enum CharacterMatch
@@ -947,6 +998,6 @@ public class UrlDetector
         /// <summary>
         /// The character was matched which is a start of parentheses.
         /// </summary>
-        CharacterMatchStart,
+        CharacterMatchStart
     }
 }

@@ -10,14 +10,16 @@ public class NormalizedUrl : Url
     private bool _isPopulated;
 
     public NormalizedUrl(UrlMarker urlMarker)
-        : base(urlMarker) { }
+        : base(urlMarker)
+    {
+    }
 
     /// <summary>
     /// Returns a normalized url given a single url.
     /// </summary>
     /// <param name="url"></param>
     /// <returns></returns>
-    public static new NormalizedUrl Create(string url) /*throws MalformedURLException*/
+    public new static NormalizedUrl Create(string url) /*throws MalformedURLException*/
     {
         return Url.Create(url).Normalize();
     }
@@ -25,7 +27,9 @@ public class NormalizedUrl : Url
     public override string GetHost()
     {
         if (GetRawHost() == null)
+        {
             PopulateHostAndHostBytes();
+        }
 
         return GetRawHost();
     }
@@ -33,7 +37,9 @@ public class NormalizedUrl : Url
     public override string GetPath()
     {
         if (GetRawPath() == null)
+        {
             SetRawPath(new PathNormalizer().NormalizePath(base.GetPath()));
+        }
 
         return GetRawPath();
     }
@@ -45,7 +51,9 @@ public class NormalizedUrl : Url
     public override byte[] GetHostBytes()
     {
         if (_hostBytes == null)
+        {
             PopulateHostAndHostBytes();
+        }
 
         return _hostBytes;
     }

@@ -32,11 +32,19 @@ public class OrdinalVsInvariant_SpanEquals
         {
             var peek = span.Slice(i, 2);
             if (peek.Equals("3a", StringComparison.InvariantCultureIgnoreCase))
+            {
                 count++;
+            }
+
             if (peek.Equals("0x", StringComparison.InvariantCultureIgnoreCase))
+            {
                 count++;
+            }
+
             if (peek.Equals("2e", StringComparison.InvariantCultureIgnoreCase))
+            {
                 count++;
+            }
         }
 
         return count;
@@ -51,11 +59,19 @@ public class OrdinalVsInvariant_SpanEquals
         {
             var peek = span.Slice(i, 2);
             if (peek.Equals("3a", StringComparison.OrdinalIgnoreCase))
+            {
                 count++;
+            }
+
             if (peek.Equals("0x", StringComparison.OrdinalIgnoreCase))
+            {
                 count++;
+            }
+
             if (peek.Equals("2e", StringComparison.OrdinalIgnoreCase))
+            {
                 count++;
+            }
         }
 
         return count;
@@ -92,7 +108,7 @@ public class OrdinalVsInvariant_StringEquals
             "XN--",
             "Xn--",
             "io",
-            "dev",
+            "dev"
         };
     }
 
@@ -101,8 +117,13 @@ public class OrdinalVsInvariant_StringEquals
     {
         var count = 0;
         for (var i = 0; i < _testStrings.Length; i++)
+        {
             if (_testStrings[i].Equals("xn--", StringComparison.InvariantCultureIgnoreCase))
+            {
                 count++;
+            }
+        }
+
         return count;
     }
 
@@ -111,8 +132,13 @@ public class OrdinalVsInvariant_StringEquals
     {
         var count = 0;
         for (var i = 0; i < _testStrings.Length; i++)
+        {
             if (_testStrings[i].Equals("xn--", StringComparison.OrdinalIgnoreCase))
+            {
                 count++;
+            }
+        }
+
         return count;
     }
 }
@@ -139,7 +165,7 @@ public class OrdinalVsCurrent_LastIndexOf
             "wss://",
             "sftp://",
             "git://",
-            "svn://",
+            "svn://"
         };
     }
 
@@ -148,7 +174,10 @@ public class OrdinalVsCurrent_LastIndexOf
     {
         var sum = 0;
         for (var i = 0; i < _schemes.Length; i++)
+        {
             sum += _schemes[i].LastIndexOf(":", StringComparison.CurrentCultureIgnoreCase);
+        }
+
         return sum;
     }
 
@@ -157,7 +186,10 @@ public class OrdinalVsCurrent_LastIndexOf
     {
         var sum = 0;
         for (var i = 0; i < _schemes.Length; i++)
+        {
             sum += _schemes[i].LastIndexOf(":", StringComparison.OrdinalIgnoreCase);
+        }
+
         return sum;
     }
 
@@ -166,7 +198,10 @@ public class OrdinalVsCurrent_LastIndexOf
     {
         var sum = 0;
         for (var i = 0; i < _schemes.Length; i++)
+        {
             sum += _schemes[i].LastIndexOf(':');
+        }
+
         return sum;
     }
 }

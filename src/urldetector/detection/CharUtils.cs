@@ -84,7 +84,9 @@ public static class CharUtils
         var splitList = new List<string>(4);
         var section = new StringBuilder();
         if (string.IsNullOrEmpty(input))
+        {
             return [""];
+        }
 
         var reader = new InputTextReader(input);
         while (!reader.Eof())
