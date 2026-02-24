@@ -1,0 +1,14 @@
+[*.cs]
+# Always require braces for single-line statements
+csharp_prefer_braces = true : error
+dotnet_diagnostic.IDE0011.severity = error
+
+# ReSharper / Rider specific
+resharper_braces_for_ifelse = required
+resharper_braces_for_for = required
+resharper_braces_for_foreach = required
+resharper_braces_for_while = required
+resharper_braces_for_dowhile = required
+resharper_braces_for_using = required
+resharper_braces_for_lock = required
+resharper_braces_for_fixed = required

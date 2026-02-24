@@ -96,7 +96,9 @@ public class UrlMarker
     public UrlMarker SetIndices(int[] indices)
     {
         if (indices == null || indices.Length != 7)
+        {
             throw new Exception("Malformed index array.");
+        }
 
         SetIndex(UrlPart.SCHEME, indices[0]);
         SetIndex(UrlPart.USERNAME_PASSWORD, indices[1]);

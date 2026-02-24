@@ -20,7 +20,7 @@ public class TestCharUtils
             new object[] { "sdoijf%2e" },
             new object[] { "ksjdfh.asdfkj.we%2" },
             new object[] { "0xc0%2e0x00%2e0x02%2e0xeb" },
-            new object[] { "" },
+            new object[] { "" }
         };
 
     [Theory]
@@ -37,11 +37,15 @@ public class TestCharUtils
     {
         char[] arr = { 'a', 'Z', 'f', 'X' };
         foreach (var a in arr)
+        {
             Assert.True(CharUtils.IsAlpha(a));
+        }
 
         char[] arr2 = { '0', '9', '[', '~' };
         foreach (var a in arr2)
+        {
             Assert.False(CharUtils.IsAlpha(a));
+        }
     }
 
     [Fact]
@@ -49,11 +53,15 @@ public class TestCharUtils
     {
         char[] arr = { 'a', 'G', '3', '9' };
         foreach (var a in arr)
+        {
             Assert.True(CharUtils.IsAlphaNumeric(a));
+        }
 
         char[] arr2 = { '~', '-', '_', '\n' };
         foreach (var a in arr2)
+        {
             Assert.False(CharUtils.IsAlphaNumeric(a));
+        }
     }
 
     [Fact]
@@ -61,11 +69,15 @@ public class TestCharUtils
     {
         char[] arr = { 'a', 'A', '0', '9' };
         foreach (var a in arr)
+        {
             Assert.True(CharUtils.IsHex(a));
+        }
 
         char[] arr2 = { '~', ';', 'Z', 'g' };
         foreach (var a in arr2)
+        {
             Assert.False(CharUtils.IsHex(a));
+        }
     }
 
     [Fact]
@@ -73,17 +85,21 @@ public class TestCharUtils
     {
         char[] arr = { '0', '4', '6', '9' };
         foreach (var a in arr)
+        {
             Assert.True(CharUtils.IsNumeric(a));
+        }
 
         // Seems you can do this Zero thing in java but not c#
         char[] arr2 =
         {
             'a',
             '~',
-            'A', /*, 0*/
+            'A' /*, 0*/
         };
         foreach (var a in arr2)
+        {
             Assert.False(CharUtils.IsNumeric(a));
+        }
     }
 
     [Fact]
@@ -91,10 +107,14 @@ public class TestCharUtils
     {
         char[] arr = { '-', '.', 'a', '9', 'Z', '_', 'f' };
         foreach (var a in arr)
+        {
             Assert.True(CharUtils.IsUnreserved(a));
+        }
 
         char[] arr2 = { ' ', '!', '(', '\n' };
         foreach (var a in arr2)
+        {
             Assert.False(CharUtils.IsUnreserved(a));
+        }
     }
 }

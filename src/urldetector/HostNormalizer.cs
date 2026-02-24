@@ -21,8 +21,6 @@ public class HostNormalizer
     private static readonly int MAX_IPV6_PART = 0xFFFF;
     private static readonly int IPV4_MAPPED_IPV6_START_OFFSET = 12;
     private static readonly int NUMBER_BYTES_IN_IPV4 = 4;
-
-    public byte[] Bytes { get; private set; }
     private readonly string _host;
     private string _normalizedHost;
 
@@ -34,10 +32,14 @@ public class HostNormalizer
         NormalizeHost();
     }
 
+    public byte[] Bytes { get; private set; }
+
     private void NormalizeHost()
     {
         if (string.IsNullOrEmpty(_host))
+        {
             return;
+        }
 
         string host;
         try
@@ -56,6 +58,7 @@ public class HostNormalizer
         Bytes = TryDecodeHostToIp(host);
 
         if (Bytes != null)
+        {
             try
             {
                 var ipAddressFromBytes = new IPAddress(Bytes);
@@ -105,9 +108,12 @@ public class HostNormalizer
             {
                 return;
             }
+        }
 
         if (string.IsNullOrEmpty(host))
+        {
             return;
+        }
 
         host = UrlUtil.RemoveExtraDots(host);
 
@@ -123,10 +129,14 @@ public class HostNormalizer
     {
         // null/empty check if needed:
         if (host is null || host.Length < 3)
+        {
             return null;
+        }
 
         if (host[0] == '[' && host[^1] == ']')
+        {
             return TryDecodeHostToIPv6(host);
+        }
 
         return TryDecodeHostToIPv4(host);
     }
@@ -150,13 +160,15 @@ public class HostNormalizer
         var numParts = parts.Length;
 
         if (numParts != 4 && numParts != 1)
+        {
             return null;
+        }
 
         var bytes = new byte[16];
 
         //An ipv4 mapped ipv6 bytes will have the 11th and 12th byte as 0xff
-        bytes[10] = (byte)0xff;
-        bytes[11] = (byte)0xff;
+        bytes[10] = 0xff;
+        bytes[11] = 0xff;
         for (var i = 0; i < parts.Length; i++)
         {
             ReadOnlySpan<char> parsedNum;
@@ -182,8 +194,11 @@ public class HostNormalizer
 
             long section;
             if (parsedNum == null || parsedNum.IsEmpty)
+            {
                 section = 0;
+            }
             else
+            {
                 try
                 {
                     if (16 == @base)
@@ -196,23 +211,30 @@ public class HostNormalizer
                                 out section
                             )
                         )
+                        {
                             return null;
+                        }
                     }
                     else if (8 == @base)
                     {
                         if (!OctalEncodingHelper.TryParseOctal(parsedNum, out section))
+                        {
                             return null;
+                        }
                     }
                     else
                     {
                         if (!long.TryParse(parsedNum, out section))
+                        {
                             return null;
+                        }
                     }
                 }
                 catch (Exception)
                 {
                     return null;
                 }
+            }
 
             if (
                 (numParts == 4 && section > MAX_IPV4_PART)
@@ -221,7 +243,10 @@ public class HostNormalizer
                 || //This would look like 4294967299
                 section < MIN_IP_PART
             )
+            {
                 return null;
+            }
+
             // bytes 13->16 is where the ipv4 address of an ipv4-mapped-ipv6-address is stored.
             if (numParts == 4)
             {
@@ -246,7 +271,6 @@ public class HostNormalizer
     /// <summary>
     /// Recommendation for IPv6 Address Text Representation
     /// http://tools.ietf.org/html/rfc5952
-    ///
     /// If ipv6 was found, _bytes is set to the byte representation of the ipv6 address
     /// </summary>
     /// <param name="host"></param>
@@ -259,7 +283,9 @@ public class HostNormalizer
         var parts = new List<string>(ip.Split(':'));
 
         if (parts.Count < 3)
+        {
             return null;
+        }
 
         //Check for embedded ipv4 address
         //string lastPart = parts.get(parts.size() - 1);
@@ -268,7 +294,9 @@ public class HostNormalizer
         var lastPartWithoutZoneIndex = zoneIndexStart == -1 ? lastPart : lastPart[..zoneIndexStart];
         byte[] ipv4Address = null;
         if (!IsHexSection(lastPartWithoutZoneIndex))
+        {
             ipv4Address = TryDecodeHostToIPv4(lastPartWithoutZoneIndex);
+        }
 
         var bytes = new byte[16];
         //How many parts do we need to fill by the end of this for loop?
@@ -306,17 +334,23 @@ public class HostNormalizer
                     out section
                 );
                 if (!wasParsed)
+                {
                     return null;
+                }
             }
 
             if (section > MAX_IPV6_PART || section < MIN_IP_PART)
+            {
                 return null;
+            }
+
             var byteOffset = (numberOfFilledZeroes + i) * 2;
             bytes[byteOffset] = (byte)((section >> 8) & 0xff);
             bytes[byteOffset + 1] = (byte)(section & 0xff);
         }
 
         if (ipv4Address != null)
+        {
             Array.ConstrainedCopy(
                 ipv4Address,
                 IPV4_MAPPED_IPV6_START_OFFSET,
@@ -324,14 +358,20 @@ public class HostNormalizer
                 IPV4_MAPPED_IPV6_START_OFFSET,
                 NUMBER_BYTES_IN_IPV4
             );
+        }
+
         return bytes;
     }
 
     private static bool IsHexSection(string section)
     {
         for (var i = 0; i < section.Length; i++)
+        {
             if (!CharUtils.IsHex(section[i]))
+            {
                 return false;
+            }
+        }
 
         return true;
     }

@@ -19,7 +19,7 @@ public class TestUrl
             new object[] { "nono:boo@yahoo.com/@1234", "yahoo.com", "/@1234", "nono", "boo" },
             new object[] { "big.big.boss@google.com", "google.com", "/", "big.big.boss", "" },
             new object[] { "big.big.boss@013.xxx", "013.xxx", "/", "big.big.boss", "" },
-            new object[] { "big.big.boss@0xb02067cz", "0xb02067cz", "/", "big.big.boss", "" },
+            new object[] { "big.big.boss@0xb02067cz", "0xb02067cz", "/", "big.big.boss", "" }
         };
 
     public static IEnumerable<object[]> GetPortUrls =>
@@ -35,8 +35,8 @@ public class TestUrl
                 "http://touch.www.linkedin.com:9000",
                 "touch.www.linkedin.com",
                 "/",
-                9000,
-            },
+                9000
+            }
         };
 
     public static IEnumerable<object[]> GetQueryUrls =>
@@ -49,22 +49,22 @@ public class TestUrl
                 "bewp.bop.com/boop?bip=2&bep=3",
                 "bewp.bop.com",
                 "/boop",
-                "?bip=2&bep=3",
+                "?bip=2&bep=3"
             },
             new object[]
             {
                 "[fe80::1:192.168.12.3]/nooo?dop=2&wop=4",
                 "[fe80::1:192.168.12.3]",
                 "/nooo",
-                "?dop=2&wop=4",
+                "?dop=2&wop=4"
             },
             new object[]
             {
                 "[::1:192.1.1.1]:80/nooo?dop=[::1]&wop=4",
                 "[::1:192.1.1.1]",
                 "/nooo",
-                "?dop=[::1]&wop=4",
-            },
+                "?dop=[::1]&wop=4"
+            }
         };
 
     public static IEnumerable<object[]> GetSchemeUrls =>
@@ -74,7 +74,7 @@ public class TestUrl
             new object[] { "//www.google.com/", "", "www.google.com", "/" },
             new object[] { "//123825342/", "", "123825342", "/" },
             new object[] { "//hello/", "", "hello", "/" },
-            new object[] { "//hello:/", "", "hello", "/" },
+            new object[] { "//hello:/", "", "hello", "/" }
         };
 
     public static IEnumerable<object[]> GetUrlsAndHosts =>
@@ -84,20 +84,20 @@ public class TestUrl
             {
                 "www.booopp.com:20#fa",
                 "www.booopp.com",
-                "http://www.booopp.com:20/#fa",
+                "http://www.booopp.com:20/#fa"
             },
             new object[]
             {
                 "www.yahooo.com:20?fff#aa",
                 "www.yahooo.com",
-                "http://www.yahooo.com:20/?fff#aa",
+                "http://www.yahooo.com:20/?fff#aa"
             },
             new object[] { "www.google.com#fa", "www.google.com", "http://www.google.com/#fa" },
             new object[]
             {
                 "www.google.com?3fd#fa",
                 "www.google.com",
-                "http://www.google.com/?3fd#fa",
+                "http://www.google.com/?3fd#fa"
             },
             new object[] { "//www.google.com/", "www.google.com", "//www.google.com/" },
             new object[] { "http://www.google.com/", "www.google.com", "http://www.google.com/" },
@@ -105,58 +105,58 @@ public class TestUrl
             {
                 "ftp://whosdere:me@google.com/",
                 "google.com",
-                "ftp://whosdere:me@google.com/",
+                "ftp://whosdere:me@google.com/"
             },
             new object[]
             {
                 "ono:doope@fb.net:9090/dhdh",
                 "fb.net",
-                "http://ono:doope@fb.net:9090/dhdh",
+                "http://ono:doope@fb.net:9090/dhdh"
             },
             new object[]
             {
                 "ono:a@fboo.com:90/dhdh/@1234",
                 "fboo.com",
-                "http://ono:a@fboo.com:90/dhdh/@1234",
+                "http://ono:a@fboo.com:90/dhdh/@1234"
             },
             new object[]
             {
                 "fbeoo.net:990/dhdeh/@1234",
                 "fbeoo.net",
-                "http://fbeoo.net:990/dhdeh/@1234",
+                "http://fbeoo.net:990/dhdeh/@1234"
             },
             new object[]
             {
                 "fbeoo:@boop.com/dhdeh/@1234?aj=r",
                 "boop.com",
-                "http://fbeoo@boop.com/dhdeh/@1234?aj=r",
+                "http://fbeoo@boop.com/dhdeh/@1234?aj=r"
             },
             new object[]
             {
                 "bloop:@noooo.com/doop/@1234",
                 "noooo.com",
-                "http://bloop@noooo.com/doop/@1234",
+                "http://bloop@noooo.com/doop/@1234"
             },
             new object[]
             {
                 "bah.com/lala/@1234/@dfd@df?@dsf#ono",
                 "bah.com",
-                "http://bah.com/lala/@1234/@dfd@df?@dsf#ono",
+                "http://bah.com/lala/@1234/@dfd@df?@dsf#ono"
             },
             new object[]
             {
                 "https://dewd:dood@www.google.com:20/?why=is&this=test#?@Sdsf",
                 "www.google.com",
-                "https://dewd:dood@www.google.com:20/?why=is&this=test#?@Sdsf",
+                "https://dewd:dood@www.google.com:20/?why=is&this=test#?@Sdsf"
             },
-            new object[] { "http://013.xxx/", "013.xxx", "http://013.xxx/" },
+            new object[] { "http://013.xxx/", "013.xxx", "http://013.xxx/" }
         };
 
     public static IEnumerable<object[]> GetSingleDomainUrls =>
         new List<object[]>
         {
             new object[] { "localhost:9000/", "localhost", 9000, "http://localhost:9000/" },
-            new object[] { "go/tj", "go", 80, "http://go/tj" },
+            new object[] { "go/tj", "go", 80, "http://go/tj" }
         };
 
     [Theory]

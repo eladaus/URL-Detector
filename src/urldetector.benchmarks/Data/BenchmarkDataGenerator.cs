@@ -10,7 +10,7 @@ public enum UrlMixProfile
     IPv4Only,
     IPv6Only,
     Mixed,
-    NoUrls,
+    NoUrls
 }
 
 public static class BenchmarkDataGenerator
@@ -36,7 +36,7 @@ public static class BenchmarkDataGenerator
         "https://example.com/path/to/resource.json",
         "https://shop.example.com/products?category=electronics&sort=price",
         "http://test.example.com:9090/v1/endpoint?token=abc123&format=json",
-        "https://www.reddit.com/r/programming/comments/abc123/url_parsing/",
+        "https://www.reddit.com/r/programming/comments/abc123/url_parsing/"
     };
 
     private static readonly string[] EmailAddresses =
@@ -50,7 +50,7 @@ public static class BenchmarkDataGenerator
         "noreply@notifications.service.com",
         "dev.team@startup.co",
         "contact@museum.gallery.org",
-        "alice_b@university.edu",
+        "alice_b@university.edu"
     };
 
     private static readonly string[] IPv4Urls =
@@ -62,7 +62,7 @@ public static class BenchmarkDataGenerator
         "http://10.10.10.10:3000/metrics",
         "https://192.168.0.50:443/secure",
         "http://172.20.10.1/gateway",
-        "http://10.0.1.254:9200/elasticsearch",
+        "http://10.0.1.254:9200/elasticsearch"
     };
 
     private static readonly string[] IPv6Urls =
@@ -74,7 +74,7 @@ public static class BenchmarkDataGenerator
         "http://[2001:db8:85a3::8a2e:370:7334]/resource",
         "http://[fe80::200:5aee:feaa:20a2]/link-local",
         "http://[2001:db8::ff00:42:8329]:9090/api",
-        "http://[::1]:5000/dev",
+        "http://[::1]:5000/dev"
     };
 
     private static readonly string[] FtpUrls =
@@ -83,7 +83,7 @@ public static class BenchmarkDataGenerator
         "ftp://mirror.example.org/linux/iso/debian.iso",
         "ftp://ftp.mozilla.org/pub/firefox/releases/",
         "ftp://archive.example.com/datasets/2024/data.csv",
-        "ftp://ftp.gnu.org/gnu/gcc/",
+        "ftp://ftp.gnu.org/gnu/gcc/"
     };
 
     private static readonly string[] MixedEdgeCaseUrls =
@@ -95,7 +95,7 @@ public static class BenchmarkDataGenerator
         "https://very-long-subdomain.another-level.deep.example.com/with/a/very/long/path/that/goes/on",
         "https://example.com:8443/api/v2/users?page=1&limit=100&sort=created_at",
         "http://example.com/path?redirect=https%3A%2F%2Fother.com%2Fpage",
-        "https://example.com/file.html?v=1.2.3&cache=false#section-2",
+        "https://example.com/file.html?v=1.2.3&cache=false#section-2"
     };
 
     private static readonly string[] FillerText =
@@ -119,7 +119,111 @@ public static class BenchmarkDataGenerator
         "Benchmark results should be interpreted in context of the target workload.",
         "Concurrent access to shared resources requires careful synchronization.",
         "The cache layer reduces latency by storing frequently accessed data.",
-        "Profiling tools help identify bottlenecks in application performance.",
+        "Profiling tools help identify bottlenecks in application performance."
+    };
+
+    private static readonly string[] SingleLevelDomainUrls =
+    {
+        "http://localhost/path",
+        "http://localhost:8080/api/health",
+        "http://intranet/dashboard",
+        "http://server/api/v1/status",
+        "http://gateway/route",
+        "http://mailserver/admin",
+        "http://buildserver:9090/jobs",
+        "http://wiki/pages/home"
+    };
+
+    // HTML element templates — {0} is replaced with a URL
+    private static readonly string[] HtmlUrlTemplates =
+    {
+        "<a href=\"{0}\">Click here for details</a>",
+        "<a class=\"btn btn-primary\" href=\"{0}\" target=\"_blank\">Visit</a>",
+        "<img src=\"{0}\" alt=\"photo\" width=\"640\" height=\"480\">",
+        "<script src=\"{0}\"></script>",
+        "<link rel=\"stylesheet\" href=\"{0}\">",
+        "<iframe src=\"{0}\" width=\"100%\" height=\"400\"></iframe>",
+        "<video src=\"{0}\" controls></video>",
+        "<source src=\"{0}\" type=\"video/mp4\">",
+        "<a href=\"{0}\" rel=\"noopener noreferrer\">External link</a>",
+        "<form action=\"{0}\" method=\"post\"><input type=\"submit\"></form>",
+        "<object data=\"{0}\" type=\"application/pdf\" width=\"100%\"></object>",
+        "<meta property=\"og:url\" content=\"{0}\">"
+    };
+
+    // HTML filler templates — {0} is replaced with filler text
+    private static readonly string[] HtmlFillerTemplates =
+    {
+        "<p>{0}</p>",
+        "<div class=\"section\"><p>{0}</p></div>",
+        "<span class=\"text-muted\">{0}</span>",
+        "<h2>{0}</h2>",
+        "<h3>{0}</h3>",
+        "<li>{0}</li>",
+        "<blockquote><p>{0}</p></blockquote>",
+        "<td>{0}</td>",
+        "<div class=\"card\"><div class=\"card-body\">{0}</div></div>",
+        "<!-- {0} -->"
+    };
+
+    // JSON templates — {0} is a URL, {1} is filler text
+    private static readonly string[] JsonUrlEntryTemplates =
+    {
+        "    {{ \"url\": \"{0}\", \"title\": \"{1}\" }}",
+        "    {{ \"homepage\": \"{0}\", \"description\": \"{1}\" }}",
+        "    {{ \"link\": \"{0}\", \"label\": \"{1}\", \"active\": true }}",
+        "    {{ \"endpoint\": \"{0}\", \"method\": \"GET\", \"note\": \"{1}\" }}",
+        "    {{ \"image\": \"{0}\", \"alt\": \"{1}\", \"width\": 640 }}",
+        "    {{ \"redirect\": \"{0}\", \"status\": 301, \"comment\": \"{1}\" }}"
+    };
+
+    private static readonly string[] JsonFillerEntryTemplates =
+    {
+        "    {{ \"name\": \"{0}\", \"id\": {1} }}",
+        "    {{ \"message\": \"{0}\", \"code\": {1}, \"success\": true }}",
+        "    {{ \"text\": \"{0}\", \"index\": {1} }}",
+        "    {{ \"description\": \"{0}\", \"priority\": {1}, \"tags\": [\"a\", \"b\"] }}"
+    };
+
+    // XML templates — {0} is a URL, {1} is filler text
+    private static readonly string[] XmlUrlEntryTemplates =
+    {
+        "  <entry>\n    <link href=\"{0}\"/>\n    <summary>{1}</summary>\n  </entry>",
+        "  <item>\n    <url>{0}</url>\n    <description>{1}</description>\n  </item>",
+        "  <resource uri=\"{0}\">\n    <label>{1}</label>\n  </resource>",
+        "  <link rel=\"alternate\" href=\"{0}\" title=\"{1}\"/>",
+        "  <image>\n    <url>{0}</url>\n    <title>{1}</title>\n  </image>"
+    };
+
+    private static readonly string[] XmlFillerEntryTemplates =
+    {
+        "  <entry>\n    <title>{0}</title>\n    <id>{1}</id>\n  </entry>",
+        "  <item>\n    <description>{0}</description>\n    <pubDate>2024-01-15</pubDate>\n  </item>",
+        "  <node id=\"{1}\">\n    <content>{0}</content>\n  </node>"
+    };
+
+    // JavaScript templates — {0} is a URL, {1} is filler text
+    private static readonly string[] JsUrlStatementTemplates =
+    {
+        "  var endpoint = \"{0}\"; // {1}",
+        "  const apiUrl = \"{0}\";",
+        "  let redirectUrl = '{0}'; // {1}",
+        "  fetch(\"{0}\").then(r => r.json());",
+        "  window.location.href = \"{0}\";",
+        "  config.baseUrl = '{0}';",
+        "  urls.push(\"{0}\"); // {1}",
+        "  const img = new Image(); img.src = \"{0}\";",
+        "  $.ajax({{ url: \"{0}\", method: 'GET' }});",
+        "  import(\"{0}\").then(module => init(module));"
+    };
+
+    private static readonly string[] JsFillerStatementTemplates =
+    {
+        "  // {0}",
+        "  var data = {{ message: \"{0}\", count: {1} }};",
+        "  console.log(\"{0}\");",
+        "  if (status === {1}) {{ throw new Error(\"{0}\"); }}",
+        "  const label = \"{0}\";"
     };
 
     public static string GenerateText(
@@ -137,18 +241,28 @@ public static class BenchmarkDataGenerator
             var insertUrl = profile != UrlMixProfile.NoUrls && random.NextDouble() < urlDensity;
 
             if (insertUrl)
+            {
                 sb.Append(PickUrl(random, profile));
+            }
             else
+            {
                 sb.Append(FillerText[random.Next(FillerText.Length)]);
+            }
 
             // Random separator: space, newline, or double space
             var sep = random.Next(3);
             if (sep == 0)
+            {
                 sb.Append('\n');
+            }
             else if (sep == 1)
+            {
                 sb.Append("  ");
+            }
             else
+            {
                 sb.Append(' ');
+            }
         }
 
         return sb.ToString();
@@ -186,9 +300,11 @@ public static class BenchmarkDataGenerator
                     case 4:
                         // Split between FTP and edge-case URLs
                         if (random.Next(2) == 0)
+                        {
                             return FtpUrls[random.Next(FtpUrls.Length)];
-                        else
-                            return MixedEdgeCaseUrls[random.Next(MixedEdgeCaseUrls.Length)];
+                        }
+
+                        return MixedEdgeCaseUrls[random.Next(MixedEdgeCaseUrls.Length)];
                     default:
                         return WebUrls[random.Next(WebUrls.Length)];
                 }
@@ -217,110 +333,6 @@ public static class BenchmarkDataGenerator
     {
         return GenerateText(seed, 5 * 1024 * 1024, 0.1, profile);
     }
-
-    private static readonly string[] SingleLevelDomainUrls =
-    {
-        "http://localhost/path",
-        "http://localhost:8080/api/health",
-        "http://intranet/dashboard",
-        "http://server/api/v1/status",
-        "http://gateway/route",
-        "http://mailserver/admin",
-        "http://buildserver:9090/jobs",
-        "http://wiki/pages/home",
-    };
-
-    // HTML element templates — {0} is replaced with a URL
-    private static readonly string[] HtmlUrlTemplates =
-    {
-        "<a href=\"{0}\">Click here for details</a>",
-        "<a class=\"btn btn-primary\" href=\"{0}\" target=\"_blank\">Visit</a>",
-        "<img src=\"{0}\" alt=\"photo\" width=\"640\" height=\"480\">",
-        "<script src=\"{0}\"></script>",
-        "<link rel=\"stylesheet\" href=\"{0}\">",
-        "<iframe src=\"{0}\" width=\"100%\" height=\"400\"></iframe>",
-        "<video src=\"{0}\" controls></video>",
-        "<source src=\"{0}\" type=\"video/mp4\">",
-        "<a href=\"{0}\" rel=\"noopener noreferrer\">External link</a>",
-        "<form action=\"{0}\" method=\"post\"><input type=\"submit\"></form>",
-        "<object data=\"{0}\" type=\"application/pdf\" width=\"100%\"></object>",
-        "<meta property=\"og:url\" content=\"{0}\">",
-    };
-
-    // HTML filler templates — {0} is replaced with filler text
-    private static readonly string[] HtmlFillerTemplates =
-    {
-        "<p>{0}</p>",
-        "<div class=\"section\"><p>{0}</p></div>",
-        "<span class=\"text-muted\">{0}</span>",
-        "<h2>{0}</h2>",
-        "<h3>{0}</h3>",
-        "<li>{0}</li>",
-        "<blockquote><p>{0}</p></blockquote>",
-        "<td>{0}</td>",
-        "<div class=\"card\"><div class=\"card-body\">{0}</div></div>",
-        "<!-- {0} -->",
-    };
-
-    // JSON templates — {0} is a URL, {1} is filler text
-    private static readonly string[] JsonUrlEntryTemplates =
-    {
-        "    {{ \"url\": \"{0}\", \"title\": \"{1}\" }}",
-        "    {{ \"homepage\": \"{0}\", \"description\": \"{1}\" }}",
-        "    {{ \"link\": \"{0}\", \"label\": \"{1}\", \"active\": true }}",
-        "    {{ \"endpoint\": \"{0}\", \"method\": \"GET\", \"note\": \"{1}\" }}",
-        "    {{ \"image\": \"{0}\", \"alt\": \"{1}\", \"width\": 640 }}",
-        "    {{ \"redirect\": \"{0}\", \"status\": 301, \"comment\": \"{1}\" }}",
-    };
-
-    private static readonly string[] JsonFillerEntryTemplates =
-    {
-        "    {{ \"name\": \"{0}\", \"id\": {1} }}",
-        "    {{ \"message\": \"{0}\", \"code\": {1}, \"success\": true }}",
-        "    {{ \"text\": \"{0}\", \"index\": {1} }}",
-        "    {{ \"description\": \"{0}\", \"priority\": {1}, \"tags\": [\"a\", \"b\"] }}",
-    };
-
-    // XML templates — {0} is a URL, {1} is filler text
-    private static readonly string[] XmlUrlEntryTemplates =
-    {
-        "  <entry>\n    <link href=\"{0}\"/>\n    <summary>{1}</summary>\n  </entry>",
-        "  <item>\n    <url>{0}</url>\n    <description>{1}</description>\n  </item>",
-        "  <resource uri=\"{0}\">\n    <label>{1}</label>\n  </resource>",
-        "  <link rel=\"alternate\" href=\"{0}\" title=\"{1}\"/>",
-        "  <image>\n    <url>{0}</url>\n    <title>{1}</title>\n  </image>",
-    };
-
-    private static readonly string[] XmlFillerEntryTemplates =
-    {
-        "  <entry>\n    <title>{0}</title>\n    <id>{1}</id>\n  </entry>",
-        "  <item>\n    <description>{0}</description>\n    <pubDate>2024-01-15</pubDate>\n  </item>",
-        "  <node id=\"{1}\">\n    <content>{0}</content>\n  </node>",
-    };
-
-    // JavaScript templates — {0} is a URL, {1} is filler text
-    private static readonly string[] JsUrlStatementTemplates =
-    {
-        "  var endpoint = \"{0}\"; // {1}",
-        "  const apiUrl = \"{0}\";",
-        "  let redirectUrl = '{0}'; // {1}",
-        "  fetch(\"{0}\").then(r => r.json());",
-        "  window.location.href = \"{0}\";",
-        "  config.baseUrl = '{0}';",
-        "  urls.push(\"{0}\"); // {1}",
-        "  const img = new Image(); img.src = \"{0}\";",
-        "  $.ajax({{ url: \"{0}\", method: 'GET' }});",
-        "  import(\"{0}\").then(module => init(module));",
-    };
-
-    private static readonly string[] JsFillerStatementTemplates =
-    {
-        "  // {0}",
-        "  var data = {{ message: \"{0}\", count: {1} }};",
-        "  console.log(\"{0}\");",
-        "  if (status === {1}) {{ throw new Error(\"{0}\"); }}",
-        "  const label = \"{0}\";",
-    };
 
     /// <summary>
     /// Generates a realistic HTML page with URLs in href, src, and other attributes.
@@ -384,9 +396,15 @@ public static class BenchmarkDataGenerator
         }
 
         if (inList)
+        {
             sb.AppendLine("</ul>");
+        }
+
         if (inTable)
+        {
             sb.AppendLine("</tr></tbody></table>");
+        }
+
         sb.AppendLine("</div>");
         sb.AppendLine("</body>");
         sb.AppendLine("</html>");
@@ -410,7 +428,10 @@ public static class BenchmarkDataGenerator
         while (sb.Length < approximateSizeBytes)
         {
             if (!first)
+            {
                 sb.AppendLine(",");
+            }
+
             first = false;
 
             var insertUrl = random.NextDouble() < urlDensity;
@@ -531,7 +552,9 @@ public static class BenchmarkDataGenerator
             }
 
             if (random.Next(15) == 0 && funcCounter > 0)
+            {
                 sb.AppendLine("  }");
+            }
         }
 
         sb.AppendLine("})();");
@@ -700,17 +723,27 @@ public static class BenchmarkDataGenerator
             var insertUrl = random.NextDouble() < urlDensity;
 
             if (insertUrl)
+            {
                 sb.Append(SingleLevelDomainUrls[random.Next(SingleLevelDomainUrls.Length)]);
+            }
             else
+            {
                 sb.Append(FillerText[random.Next(FillerText.Length)]);
+            }
 
             var sep = random.Next(3);
             if (sep == 0)
+            {
                 sb.Append('\n');
+            }
             else if (sep == 1)
+            {
                 sb.Append("  ");
+            }
             else
+            {
                 sb.Append(' ');
+            }
         }
 
         return sb.ToString();

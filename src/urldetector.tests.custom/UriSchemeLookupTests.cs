@@ -31,7 +31,7 @@ public class UriSchemeLookupTests
     [Fact]
     public void TestMailTo()
     {
-        var inputText = $" mailTo:dale:blah@mytestsite.com and then mailto://me@test.com";
+        var inputText = " mailTo:dale:blah@mytestsite.com and then mailto://me@test.com";
         var urlDetector = new UrlDetector(
             inputText,
             UrlDetectorOptions.Default | UrlDetectorOptions.HTML

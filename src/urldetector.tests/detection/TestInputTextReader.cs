@@ -12,7 +12,9 @@ public class TestInputTextReader
     {
         var reader = new InputTextReader(CONTENT);
         for (var i = 0; i < CONTENT.Length - 1; i++)
+        {
             reader.Read();
+        }
 
         Assert.False(reader.Eof());
         reader.Read();
@@ -50,6 +52,8 @@ public class TestInputTextReader
     {
         var reader = new InputTextReader(CONTENT);
         for (var i = 0; i < CONTENT.Length; i++)
+        {
             Assert.Equal(CONTENT[i], reader.Read());
+        }
     }
 }

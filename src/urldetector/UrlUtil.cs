@@ -8,7 +8,9 @@ namespace urldetector;
 
 public class UrlUtil
 {
-    private UrlUtil() { }
+    private UrlUtil()
+    {
+    }
 
     /// <summary>
     /// Decodes the url by iteratively removing hex characters with backtracking.
@@ -40,19 +42,25 @@ public class UrlUtil
                     stringBuilder.Insert(i, decodedChar); //add decoded character
 
                     if (decodedChar == '%')
+                    {
                         i--; //backtrack one character to check for another decoding with this %.
+                    }
                     else if (
-                        !nonDecodedPercentIndices.IsEmpty()
-                        && CharUtils.IsHex(decodedChar)
-                        && CharUtils.IsHex(stringBuilder[i - 1])
-                        && i - nonDecodedPercentIndices.Peek() == 2
-                    )
+                            !nonDecodedPercentIndices.IsEmpty()
+                            && CharUtils.IsHex(decodedChar)
+                            && CharUtils.IsHex(stringBuilder[i - 1])
+                            && i - nonDecodedPercentIndices.Peek() == 2
+                        )
                         //Go back to the last non-decoded percent sign if it's decodable.
                         //We only need to go back if it's of form %[HEX][HEX]
+                    {
                         i = nonDecodedPercentIndices.Pop() - 1; //backtrack to the % sign.
+                    }
                     else if (!nonDecodedPercentIndices.IsEmpty() && i == stringBuilder.Length - 2)
                         //special case to handle %[HEX][Unknown][end of string]
+                    {
                         i = nonDecodedPercentIndices.Pop() - 1; //backtrack to the % sign.
+                    }
                 }
                 else
                 {
@@ -79,7 +87,9 @@ public class UrlUtil
         {
             var curr = stringBuilder[i];
             if (CharUtils.IsWhiteSpace(curr))
+            {
                 stringBuilder.Remove(i, 1);
+            }
         }
 
         return stringBuilder.ToString();
@@ -99,9 +109,13 @@ public class UrlUtil
             var b = (byte)chr;
             if (b <= 32 || b >= 127 || chr == '#' || chr == '%')
                 // %XX
+            {
                 encoder.Append('%').Append(BitConverter.ToString([b]));
+            }
             else
+            {
                 encoder.Append(chr);
+            }
         }
 
         return encoder.ToString();
@@ -125,18 +139,26 @@ public class UrlUtil
             {
                 var possibleDot = curr;
                 while (possibleDot == '.' && !reader.Eof())
+                {
                     possibleDot = reader.Read();
+                }
 
                 if (possibleDot != '.')
+                {
                     stringBuilder.Append(possibleDot);
+                }
             }
         }
 
         if (stringBuilder.Length > 0 && stringBuilder[^1] == '.')
+        {
             stringBuilder.Remove(stringBuilder.Length - 1, 1);
+        }
 
         if (stringBuilder.Length > 0 && stringBuilder[0] == '.')
+        {
             stringBuilder.Remove(0, 1);
+        }
 
         return stringBuilder.ToString();
     }

@@ -11,7 +11,9 @@ public static class OctalEncodingHelper
             var isOctal = c >= '0' && c <= '7';
 
             if (!isOctal)
+            {
                 return false;
+            }
         }
 
         return true;
@@ -31,7 +33,9 @@ public static class OctalEncodingHelper
         {
             // fast ASCII check for '0'–'7'
             if ((uint)(c - '0') > 7)
+            {
                 return false;
+            }
 
             // multiply by 8 and add digit
             tmpResult = (tmpResult << 3) + (c - '0');

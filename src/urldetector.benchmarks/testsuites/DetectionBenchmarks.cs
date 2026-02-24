@@ -9,18 +9,18 @@ namespace urldetector.benchmarks.testsuites;
 
 /// <summary>
 /// Measures how detection scales with input size, from tiny 200-byte strings up to 5 MB bodies.
-/// All inputs use the <see cref="UrlMixProfile.Mixed"/> profile with <see cref="UrlDetectorOptions.Default"/>.
+/// All inputs use the <see cref="UrlMixProfile.Mixed" /> profile with <see cref="UrlDetectorOptions.Default" />.
 /// </summary>
 [SimpleJob(RuntimeMoniker.Net80)]
 [SimpleJob(RuntimeMoniker.Net10_0)]
 [MemoryDiagnoser]
 public class InputSizeBenchmarks
 {
+    private string _large;
+    private string _medium;
+    private string _small;
     private string _tinyNoUrls;
     private string _tinyWithUrls;
-    private string _small;
-    private string _medium;
-    private string _large;
     private string _veryLarge;
 
     [GlobalSetup]
@@ -80,10 +80,10 @@ public class InputSizeBenchmarks
 [MemoryDiagnoser]
 public class UrlDensityBenchmarks
 {
-    private string _none;
+    private string _high;
     private string _low;
     private string _medium;
-    private string _high;
+    private string _none;
     private string _veryHigh;
 
     [GlobalSetup]
@@ -136,12 +136,12 @@ public class UrlDensityBenchmarks
 [MemoryDiagnoser]
 public class UrlTypeBenchmarks
 {
-    private string _web;
     private string _email;
     private string _ipv4;
     private string _ipv6;
     private string _mixed;
     private string _plainText;
+    private string _web;
 
     [GlobalSetup]
     public void Setup()
@@ -192,7 +192,7 @@ public class UrlTypeBenchmarks
 }
 
 /// <summary>
-/// Measures the cost of each <see cref="UrlDetectorOptions"/> mode on the same ~50 KB mixed input.
+/// Measures the cost of each <see cref="UrlDetectorOptions" /> mode on the same ~50 KB mixed input.
 /// Provides a direct comparison of option overhead independent of content format.
 /// </summary>
 [SimpleJob(RuntimeMoniker.Net80)]
@@ -267,10 +267,10 @@ public class DetectorOptionsBenchmarks
 }
 
 /// <summary>
-/// Tests each <see cref="UrlDetectorOptions"/> mode against content structured in the matching format.
-/// HTML pages are tested with <see cref="UrlDetectorOptions.HTML"/>, JSON documents with
-/// <see cref="UrlDetectorOptions.JSON"/>, XML feeds with <see cref="UrlDetectorOptions.XML"/>, and so on.
-/// Each content type is tested with both <see cref="UrlDetectorOptions.Default"/> and its matching
+/// Tests each <see cref="UrlDetectorOptions" /> mode against content structured in the matching format.
+/// HTML pages are tested with <see cref="UrlDetectorOptions.HTML" />, JSON documents with
+/// <see cref="UrlDetectorOptions.JSON" />, XML feeds with <see cref="UrlDetectorOptions.XML" />, and so on.
+/// Each content type is tested with both <see cref="UrlDetectorOptions.Default" /> and its matching
 /// option to measure the overhead or benefit of using the correct mode.
 /// </summary>
 [SimpleJob(RuntimeMoniker.Net80)]
@@ -281,15 +281,15 @@ public class StructuredContentBenchmarks
     private const int Size = 50 * 1024;
     private const double Density = 0.2;
     private const int Seed = 400;
+    private string _bracketed;
 
     private string _html;
-    private string _json;
-    private string _xml;
     private string _javaScript;
+    private string _json;
     private string _quoted;
-    private string _singleQuoted;
-    private string _bracketed;
     private string _singleLevelDomain;
+    private string _singleQuoted;
+    private string _xml;
 
     [GlobalSetup]
     public void Setup()
@@ -418,7 +418,7 @@ public class StructuredContentBenchmarks
 }
 
 /// <summary>
-/// Tests real HTML sample files (tiny through large) with <see cref="UrlDetectorOptions.Default"/>
+/// Tests real HTML sample files (tiny through large) with <see cref="UrlDetectorOptions.Default" />
 /// versus all flags enabled, measuring the overhead of enabling every option on actual web pages.
 /// </summary>
 [SimpleJob(RuntimeMoniker.Net80)]
@@ -437,10 +437,11 @@ public class RealWorldHtmlBenchmarks
         | UrlDetectorOptions.SINGLE_QUOTE_MATCH
         | UrlDetectorOptions.XML;
 
-    private string _tiny;
-    private string _small;
-    private string _medium;
     private string _large;
+    private string _medium;
+    private string _small;
+
+    private string _tiny;
 
     [GlobalSetup]
     public void Setup()

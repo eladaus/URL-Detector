@@ -8,5 +8,5 @@ public enum UrlPart
     PORT,
     HOST,
     USERNAME_PASSWORD,
-    SCHEME,
+    SCHEME
 }
