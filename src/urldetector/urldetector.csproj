@@ -22,10 +22,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="GitVersion.MsBuild" Version="6.3.0">
+        <PackageReference Include="GitVersion.MsBuild" Version="6.7.0">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="System.Collections.Immutable" Version="9.0.5"/>
+        <PackageReference Include="System.Collections.Immutable" Version="10.0.6"/>
     </ItemGroup>
 </Project>
