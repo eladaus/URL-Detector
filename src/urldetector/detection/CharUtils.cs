@@ -57,6 +57,44 @@ public static class CharUtils
     }
 
     /// <summary>
+    /// Checks if character is valid in an RFC 5322 dot-atom email local-part (unquoted form).
+    /// Used for peek-ahead detection of sub-addressing patterns such as user+tag@gmail.com.
+    /// Excludes '/' as it conflicts with URL path/scheme syntax during detection.
+    /// </summary>
+    public static bool IsEmailLocalPartChar(char a)
+    {
+        if (IsAlphaNumeric(a) || a == '.')
+        {
+            return true;
+        }
+
+        switch (a)
+        {
+            case '!':
+            case '#':
+            case '$':
+            case '%':
+            case '&':
+            case '\'':
+            case '*':
+            case '+':
+            case '-':
+            case '=':
+            case '?':
+            case '^':
+            case '_':
+            case '`':
+            case '{':
+            case '|':
+            case '}':
+            case '~':
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /// <summary>
     /// Checks if character is a dot. Here is the doc:
     /// http://docs.oracle.com/javase/6/docs/api/java/net/IDN.html#toASCII%28java.lang.String,%20int%29
     /// </summary>

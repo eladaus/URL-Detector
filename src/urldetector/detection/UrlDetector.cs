@@ -241,6 +241,15 @@ public class UrlDetector
                 case '\uFF61':
                 case '.': //"." was found, read the domain name using the start from length.
                     _buffer.Append(curr);
+                    if (HasAtBeforeUrlTerminator())
+                    {
+                        // Upcoming text looks like an email local-part (has '@' before any
+                        // URL terminator). Defer the domain read so the dot accumulates into
+                        // the local-part instead of committing to a domain that would strip
+                        // trailing sub-addressing chars like +tag.
+                        break;
+                    }
+
                     if (!ReadDomainName(_buffer.ToString(length)))
                     {
                         ReadEnd(ReadEndState.InvalidUrl);
@@ -364,6 +373,37 @@ public class UrlDetector
                 ReadEnd(ReadEndState.InvalidUrl);
             }
         }
+    }
+
+    /// <summary>
+    /// Peek ahead in the input to decide whether the character just appended (typically a '.')
+    /// is part of an email local-part. Returns true if an '@' is found before any URL
+    /// terminator or any non-local-part character, within a bounded lookahead window.
+    /// </summary>
+    private bool HasAtBeforeUrlTerminator()
+    {
+        // RFC 5321 caps the full path at 256 octets; that's a generous ceiling for the peek.
+        const int MaxPeek = 256;
+        for (var i = 0; i < MaxPeek && _reader.CanReadChars(i + 1); i++)
+        {
+            var c = _reader.PeekChar(i);
+            if (c == '@')
+            {
+                return true;
+            }
+
+            if (CharUtils.IsWhiteSpace(c) || c == '<' || c == '>' || c == '"')
+            {
+                return false;
+            }
+
+            if (!CharUtils.IsEmailLocalPartChar(c))
+            {
+                return false;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>
