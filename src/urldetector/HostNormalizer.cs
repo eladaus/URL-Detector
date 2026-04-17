@@ -193,7 +193,7 @@ public class HostNormalizer
             }
 
             long section;
-            if (parsedNum == null || parsedNum.IsEmpty)
+            if (parsedNum.IsEmpty)
             {
                 section = 0;
             }
