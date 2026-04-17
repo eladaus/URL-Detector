@@ -18,7 +18,7 @@
         <RepositoryType>GIT</RepositoryType>
         <PackageTags>url detector parser extractor url-detector url-parser url-extractor text-parsing linkedin eladaus</PackageTags>
         <PackageId>eladaus.urldetector</PackageId>
-        <PackageReleaseNotes>Add .NET 10 target; reduce memory allocations; fix IPv4/IPv6 address normalization; code cleanup and formatting</PackageReleaseNotes>
+        <PackageReleaseNotes>Emails with dotted local-parts and sub-addressing characters (e.g. first.last+sales@eladaus.com) are now detected as a single match instead of being split.</PackageReleaseNotes>
     </PropertyGroup>
 
     <ItemGroup>
