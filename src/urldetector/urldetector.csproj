@@ -28,15 +28,4 @@
         </PackageReference>
         <PackageReference Include="System.Collections.Immutable" Version="9.0.5"/>
     </ItemGroup>
-
-    <ItemGroup>
-        <!-- point to the actual file on disk -->
-        <None Include="..\\..\\LICENSE.txt">
-            <!-- include it in the nupkg -->
-            <Pack>true</Pack>
-            <!-- place it at the root of the package as LICENSE.txt -->
-            <PackagePath></PackagePath>
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-    </ItemGroup>
 </Project>

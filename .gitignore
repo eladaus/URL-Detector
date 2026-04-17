@@ -38,3 +38,18 @@ project.fragment.lock.json
 
 # BenchmarkDotNet output/report files
 **/BenchmarkDotNet.Artifacts/
+
+# Claude Code — user-local settings, credentials, and state (never commit).
+# Team-shared files under .claude/ (settings.json, commands/, agents/, hooks.json,
+# CLAUDE.md) remain tracked on purpose — only the user-local variants are ignored.
+**/.claude/settings.local.json
+**/.claude/.credentials.json
+**/.claude/*.local.json
+**/.claude/cache/
+**/.claude/logs/
+**/.claude/history/
+**/.claude/projects/
+**/.claude/todos/
+**/.claude/shell-snapshots/
+.claude.json
+.claude.json.backup
