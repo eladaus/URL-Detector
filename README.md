@@ -37,6 +37,12 @@ It is able to find and detect any urls such as:
 * __IPv6 Address__    - ftp://[::]/hello
 * __IPv4-mapped IPv6 Address__  - http://[fe30:4:3:0:192.3.2.1]/
 
+
+_Note: This C# port improves upon the original LinkedIn library by detecting emails with RFC 5322 dot-atom
+local-parts, including Gmail/Fastmail-style sub-addressing with a `+` tag (e.g. `user.name+tag@gmail.com`) as
+a single match. The full set of dot-atom specials (`! # $ % & ' * + - = ? ^ _ \` { | } ~`) is also accepted in
+local-parts, including in combination with dots._
+
 _Note: Keep in mind that for security purposes, its better to overdetect urls and check more against blacklists than to
 not detect a url that was submitted. As such, some things that we detect might not be urls but somewhat look like urls.
 Also, instead of complying with RFC 3986 (http://www.ietf.org/rfc/rfc3986.txt), we try to detect based on browser
