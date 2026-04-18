@@ -15,7 +15,7 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           # 👇 pull every branch & tag so GitVersion can see full history
           fetch-depth: 0
@@ -23,14 +23,14 @@ jobs:
           ref: ${{ github.ref }}
 
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: |
             8.0.x
             10.0.x
 
       - name: Cache NuGet packages
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.nuget/packages
           key: ${{ runner.os }}-nuget-${{ hashFiles(format('{0}/**/*.csproj', env.PROJECT_PATH)) }}

@@ -13,6 +13,7 @@
             https://github.com/eladaus/URL-Detector
         </Description>
         <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageProjectUrl>https://github.com/eladaus/URL-Detector</PackageProjectUrl>
         <RepositoryUrl>https://github.com/eladaus/URL-Detector</RepositoryUrl>
         <RepositoryType>GIT</RepositoryType>
@@ -20,6 +21,10 @@
         <PackageId>eladaus.urldetector</PackageId>
         <PackageReleaseNotes>Emails with dotted local-parts and sub-addressing characters (e.g. first.last+sales@eladaus.com) are now detected as a single match instead of being split.</PackageReleaseNotes>
     </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="GitVersion.MsBuild" Version="6.7.0">
